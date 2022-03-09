@@ -11,10 +11,10 @@ func InitRouter() *gin.Engine {
 	//使用gin框架，生成默认的空引擎
 	engine := gin.Default()
 	//挂载自定义中间件
-	engine.Use(middleware.Middlewaretest())
+	engine.Use(middleware.MyMiddlewareTest())
 	//依次加载所有的路由组
 	LoadGroup1Router(engine)
 	LoadGroup2Router(engine)
-	//引擎处理完成后，返回，供其他人使用
+	//引擎处理完成后，返回
 	return engine
 }
