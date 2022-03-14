@@ -6,7 +6,6 @@ import (
 )
 
 func main() {
-
 	//加载配置
 	util.LoadConfig()
 	//连接数据库

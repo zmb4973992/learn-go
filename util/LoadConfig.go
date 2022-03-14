@@ -33,4 +33,5 @@ func LoadConfig() {
 	MyConfig.DbUsername = config.Section("database").Key("DbUser").String()
 	MyConfig.DbPassword = config.Section("database").Key("DbPassword").String()
 	MyConfig.Dsn = "sqlserver://" + MyConfig.DbUsername + ":" + MyConfig.DbPassword + "@" + MyConfig.DbHost + ":" + MyConfig.DbPort + "?database=" + MyConfig.DbName
+	fmt.Println(MyConfig)
 }
