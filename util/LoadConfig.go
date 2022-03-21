@@ -20,10 +20,9 @@ type Config struct {
 var MyConfig = new(Config)
 
 func LoadConfig() {
-
 	config, err := ini.Load("./config/config.ini")
 	if err != nil {
-		fmt.Println("配置文件路径错误", err)
+		fmt.Println("配置文件路径错误：", err)
 	}
 	MyConfig.AppMode = config.Section("server").Key("AppMode").MustString("debug")  //config中不填的话就默认为debug
 	MyConfig.HttpPort = config.Section("server").Key("HttpPort").MustString("8000") //config中不填的话就默认为8000
@@ -33,5 +32,4 @@ func LoadConfig() {
 	MyConfig.DbUsername = config.Section("database").Key("DbUser").String()
 	MyConfig.DbPassword = config.Section("database").Key("DbPassword").String()
 	MyConfig.Dsn = "sqlserver://" + MyConfig.DbUsername + ":" + MyConfig.DbPassword + "@" + MyConfig.DbHost + ":" + MyConfig.DbPort + "?database=" + MyConfig.DbName
-	fmt.Println(MyConfig)
 }

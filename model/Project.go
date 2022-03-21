@@ -19,6 +19,7 @@ type Project struct {
 	UpdatedAt        time.Time
 }
 
+// TableName 将表名改为project
 func (Project) TableName() string {
 	return "project"
 }
