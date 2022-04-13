@@ -30,6 +30,7 @@ func ConnectDatabase() {
 	err = DB.AutoMigrate(
 		&model.RelatedParty{},
 		&model.Project{},
+		&model.User{},
 	)
 	if err != nil {
 		fmt.Println("数据表迁移失败，请检查")

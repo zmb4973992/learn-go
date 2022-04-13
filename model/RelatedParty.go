@@ -3,7 +3,7 @@ package model
 import "time"
 
 type RelatedParty struct {
-	ID                      uint
+	ID                      uint64
 	ChineseName             string
 	EnglishName             string
 	Relationship            string

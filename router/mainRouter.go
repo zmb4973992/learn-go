@@ -14,6 +14,7 @@ func InitRouter() *gin.Engine {
 	//依次加载所有的路由组
 	LoadRelatedPartyRouter(engine)
 	LoadProjectRouter(engine)
+	LoadUserRouter(engine)
 	//引擎处理完成后，返回
 	return engine
 }

@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Project struct {
-	ID               uint
+	ID               uint64
 	RelatedPartyID   uint //外键
 	ProjectCode      string
 	ProjectFullName  string

@@ -3,9 +3,9 @@ package model
 import "time"
 
 type User struct {
-	ID        uint
-	Username  string
-	Password  string
+	ID        uint64 `form:"id"`
+	Username  string `form:"username"`
+	Password  string `form:"password"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
