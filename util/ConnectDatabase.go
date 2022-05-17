@@ -13,6 +13,11 @@ var (
 	err error
 )
 
+func test() {
+
+}
+
+//待重构测试~
 func ConnectDatabase() {
 	//通过gorm连接sqlserver数据库
 	DB, err = gorm.Open(sqlserver.Open(MyConfig.Dsn), &gorm.Config{})
