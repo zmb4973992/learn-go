@@ -8,7 +8,7 @@ import (
 func LoadRelatedPartyRouter(engine *gin.Engine) {
 	RelatedPartyGroup := engine.Group("/related_party")
 	{
-		RelatedPartyGroup.GET("/1", controller.FindRelatedParty)
+		RelatedPartyGroup.GET("/:id", controller.FindRelatedParty)
 	}
 
 }

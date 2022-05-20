@@ -12,5 +12,7 @@ func FindRelatedParty(context *gin.Context) {
 	var relatedParty model.RelatedParty
 	util.DB.First(&relatedParty)
 	fmt.Println(relatedParty)
-	context.JSON(http.StatusOK, gin.H{"data": relatedParty})
+	context.JSON(http.StatusOK, gin.H{
+		"status": 200,
+		"data":   222})
 }

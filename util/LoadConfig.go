@@ -13,7 +13,7 @@ type Config struct {
 	DbName     string
 	DbUsername string
 	DbPassword string
-	Dsn        string //Data Source Name 数据库连接字符串
+	Dsn        string // Data Source Name 数据库连接字符串
 }
 
 // MyConfig 结构体实例化
@@ -23,6 +23,7 @@ func LoadConfig() {
 	config, err := ini.Load("./config/config.ini")
 	if err != nil {
 		fmt.Println("配置文件路径错误：", err)
+		return
 	}
 	MyConfig.AppMode = config.Section("server").Key("AppMode").MustString("debug")  //config中不填的话就默认为debug
 	MyConfig.HttpPort = config.Section("server").Key("HttpPort").MustString("8000") //config中不填的话就默认为8000
