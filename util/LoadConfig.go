@@ -16,8 +16,20 @@ type Config struct {
 	Dsn        string // Data Source Name 数据库连接字符串
 }
 
+type JWTConfig struct {
+	SecretKey []byte //这里不能用string，是jwt包的要求，否则报错
+}
+
+type LogConfig struct {
+	RelativePath string
+}
+
 // MyConfig 结构体实例化
-var MyConfig = new(Config)
+var (
+	MyConfig    = new(Config)
+	MyJWTConfig = new(JWTConfig)
+	MyLogConfig = new(LogConfig)
+)
 
 func LoadConfig() {
 	config, err := ini.Load("./config/config.ini")
@@ -33,4 +45,14 @@ func LoadConfig() {
 	MyConfig.DbUsername = config.Section("database").Key("DbUser").String()
 	MyConfig.DbPassword = config.Section("database").Key("DbPassword").String()
 	MyConfig.Dsn = "sqlserver://" + MyConfig.DbUsername + ":" + MyConfig.DbPassword + "@" + MyConfig.DbHost + ":" + MyConfig.DbPort + "?database=" + MyConfig.DbName
+
+	err = config.Section("jwt").MapTo(MyJWTConfig)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	err = config.Section("log").MapTo(MyLogConfig)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
