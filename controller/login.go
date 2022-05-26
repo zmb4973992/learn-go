@@ -5,6 +5,7 @@ import (
 	"learn-go/serializer"
 	"learn-go/service"
 	"learn-go/util/code"
+	"learn-go/util/jwt"
 	"net/http"
 )
 
@@ -14,11 +15,23 @@ func Login(c *gin.Context) {
 	if err != nil {
 		res := serializer.CommonResponse{
 			Code:    code.Error,
-			Data:    "",
-			Message: code.ErrorMessage[code.Error],
+			Data:    nil,
+			Message: code.GetErrorMessage(code.Error),
 		}
 		c.JSON(code.Error, res)
+		return
 	}
-	res := s.Login(s.Username)
+
+	res := s.Login()
+	token := jwt.GenerateToken(s.Username)
+	c.Header("authorization", token)
 	c.JSON(http.StatusOK, res)
+}
+
+func ParseTokenTest(c *gin.Context) {
+	u, _ := c.Get("username")
+	c.JSON(http.StatusOK, gin.H{
+		"n": u,
+	})
+
 }

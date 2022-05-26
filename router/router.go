@@ -14,11 +14,18 @@ func InitRouter() *gin.Engine {
 	//依次加载所有的路由组
 	api := engine.Group("/api/v1")
 	{
-		api.GET("/login", controller.Login)
+		api.POST("/login", controller.Login)
+
+		//api.Use(middleware.JWT())
+		{
+			api.POST("/test", controller.ParseTokenTest)
+
+		}
 		api.GET("/user/:id")
 		relatedParty := api.Group("/related_party")
 		{
-			relatedParty.GET("/:id", controller.FindRelatedParty)
+			relatedParty.GET("/list", controller.RelatedPartyList)
+			relatedParty.GET("/:id", controller.RelatedPartyDetail)
 		}
 
 	}

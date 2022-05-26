@@ -6,22 +6,32 @@ import (
 	"learn-go/model"
 	"learn-go/serializer"
 	"learn-go/util"
+	"learn-go/util/code"
+	"learn-go/util/jwt"
 )
 
 type UserLoginService struct {
-	Username string `form:"username" json:"username"`
-	Password string `form:"password" json:"password"`
+	Username string `form:"username" json:"username" binding:"required"`
+	Password string `form:"password" json:"password" binding:"required"`
 }
 
-func (s *UserLoginService) Login(username string) serializer.CommonResponse {
+func (s *UserLoginService) Login() serializer.CommonResponse {
 	var user model.User
-	res := util.DB.Where("username=?", s.Username).First(&user)
+	res := util.DB.Where("username=? and password=?", s.Username, s.Password).First(&user)
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-		return serializer.CommonResponse{Message: "错误"}
+		return serializer.CommonResponse{
+			Code:    code.Error_Username_Or_Password_Exist,
+			Message: code.GetErrorMessage(code.Error_Username_Or_Password_Exist),
+		}
 	}
 
-	util.DB.Debug().Exec("delete from `user` where username = ?", "333")
-
-	return serializer.CommonResponse{Data: "66"}
-
+	token := jwt.GenerateToken(user.Username)
+	return serializer.CommonResponse{
+		Data: serializer.UserLoginResponse{
+			Username: user.Username,
+			Token:    token,
+		},
+		Code:    code.Success,
+		Message: code.GetErrorMessage(code.Success),
+	}
 }
