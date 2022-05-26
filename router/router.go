@@ -19,13 +19,13 @@ func InitRouter() *gin.Engine {
 		//api.Use(middleware.JWT())
 		{
 			api.POST("/test", controller.ParseTokenTest)
-
 		}
 		api.GET("/user/:id")
 		relatedParty := api.Group("/related_party")
 		{
-			relatedParty.GET("/list", controller.RelatedPartyList)
-			relatedParty.GET("/:id", controller.RelatedPartyDetail)
+			relatedParty.GET("/list", controller.GetListOfRelatedParty)
+			relatedParty.GET("/:id", controller.GetDetailOfRelatedParty)
+			relatedParty.PUT("/:id", controller.UpdateDetailOfRelatedParty)
 		}
 
 	}
