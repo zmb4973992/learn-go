@@ -15,8 +15,8 @@ func JWT() func(c *gin.Context) {
 		if token == "" {
 			c.JSON(http.StatusOK, serializer.CommonResponse{
 				Data:    nil,
-				Code:    code.Error_Token_Invalid,
-				Message: code.GetErrorMessage(code.Error_Token_Invalid),
+				Code:    code.ErrorTokenInvalid,
+				Message: code.GetErrorMessage(code.ErrorTokenInvalid),
 			})
 			c.Abort()
 			return
@@ -26,8 +26,8 @@ func JWT() func(c *gin.Context) {
 		if err != nil || res.ExpiresAt < time.Now().Unix() {
 			c.JSON(http.StatusOK, serializer.CommonResponse{
 				Data:    nil,
-				Code:    code.Error_Token_Invalid,
-				Message: code.GetErrorMessage(code.Error_Token_Invalid),
+				Code:    code.ErrorTokenInvalid,
+				Message: code.GetErrorMessage(code.ErrorTokenInvalid),
 			})
 			c.Abort()
 			return

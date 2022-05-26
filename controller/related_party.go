@@ -5,6 +5,7 @@ import (
 	"learn-go/serializer"
 	"learn-go/service"
 	"learn-go/util"
+	"learn-go/util/code"
 	"net/http"
 	"strconv"
 )
@@ -24,11 +25,17 @@ func GetDetailOfRelatedParty(c *gin.Context) {
 }
 
 func UpdateDetailOfRelatedParty(c *gin.Context) {
-	relatedPartyID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	var input service.RelatedParty
-
-	c.ShouldBind(&input)
-	input.ID = relatedPartyID
-	res := service.UpdateDetailOfRelatedParty(input)
+	var paramIn service.RelatedParty
+	err := c.ShouldBind(&paramIn)
+	if err != nil {
+		c.JSON(http.StatusOK, serializer.CommonResponse{
+			Data:    nil,
+			Code:    code.ErrorNotEnoughParameters,
+			Message: code.GetErrorMessage(code.ErrorNotEnoughParameters),
+		})
+		return
+	}
+	paramIn.ID, _ = strconv.ParseInt(c.Param("id"), 10, 64) //把uri上的id参数传递给结构体形式的入参
+	res := service.UpdateDetailOfRelatedParty(paramIn)
 	c.JSON(200, res)
 }

@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"gorm.io/gorm"
 	"learn-go/model"
 	"learn-go/serializer"
@@ -13,14 +12,14 @@ import (
 
 type RelatedParty struct {
 	ID                      int64
-	ChineseName             *string   `form:"chinese_name"`
-	EnglishName             *string   `form:"english_name"`
-	SupplierCode            *string   `form:"supplier_code"`
-	Address                 string    `form:"address"`
-	UniformSocialCreditCode string    `form:"uniform_social_credit_code"` //统一社会信用代码
-	Telephone               string    `form:"telephone"`
-	CreatedAt               time.Time `form:"created_at"`
-	UpdatedAt               time.Time `form:"updated_at"`
+	ChineseName             *string    `form:"chinese_name" binding:"required"`
+	EnglishName             *string    `form:"english_name" binding:"required"`
+	SupplierCode            *string    `form:"supplier_code" binding:"required"`
+	Address                 *string    `form:"address" binding:"required"`
+	UniformSocialCreditCode *string    `form:"uniform_social_credit_code" binding:"required"` //统一社会信用代码
+	Telephone               *string    `form:"telephone" binding:"required"`
+	CreatedAt               *time.Time `form:"created_at"`
+	UpdatedAt               *time.Time `form:"updated_at"`
 }
 
 func GetListOfRelatedParty(paginationRule util.PaginationRule) (*serializer.CommonResponse, error) {
@@ -43,8 +42,8 @@ func GetDetailOfRelatedParty(id int64) (*serializer.CommonResponse, error) {
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return &serializer.CommonResponse{
 			Data:    nil,
-			Code:    code.Error_Record_Not_Found,
-			Message: code.GetErrorMessage(code.Error_Record_Not_Found),
+			Code:    code.ErrorRecordNotFound,
+			Message: code.GetErrorMessage(code.ErrorRecordNotFound),
 		}, nil
 	}
 	return &serializer.CommonResponse{
@@ -60,16 +59,23 @@ func UpdateDetailOfRelatedParty(paramIn RelatedParty) serializer.CommonResponse 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return serializer.CommonResponse{
 			Data:    nil,
-			Code:    code.Error_Record_Not_Found,
-			Message: code.GetErrorMessage(code.Error_Record_Not_Found),
+			Code:    code.ErrorRecordNotFound,
+			Message: code.GetErrorMessage(code.ErrorRecordNotFound),
 		}
 	}
 	record.ChineseName = paramIn.ChineseName
 	record.EnglishName = paramIn.EnglishName
+	record.SupplierCode = paramIn.SupplierCode
+	record.Address = paramIn.Address
+	record.UniformSocialCreditCode = paramIn.UniformSocialCreditCode
+	record.Telephone = paramIn.Telephone
 	result = util.DB.Debug().Save(&record)
 	if result.Error != nil {
-		fmt.Println(result.Error)
-		return serializer.CommonResponse{}
+		return serializer.CommonResponse{
+			Data:    nil,
+			Code:    code.Error,
+			Message: code.GetErrorMessage(code.Error),
+		}
 	}
 	return serializer.CommonResponse{
 		Data:    nil,

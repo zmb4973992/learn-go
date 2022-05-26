@@ -20,8 +20,8 @@ func (s *UserLoginService) Login() serializer.CommonResponse {
 	res := util.DB.Where("username=? and password=?", s.Username, s.Password).First(&user)
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return serializer.CommonResponse{
-			Code:    code.Error_Username_Or_Password_Exist,
-			Message: code.GetErrorMessage(code.Error_Username_Or_Password_Exist),
+			Code:    code.ErrorUsernameOrPasswordExist,
+			Message: code.GetErrorMessage(code.ErrorUsernameOrPasswordExist),
 		}
 	}
 
