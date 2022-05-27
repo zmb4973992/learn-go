@@ -1,11 +1,11 @@
 package main
 
-import (
-	"fmt"
-)
-
 func main() {
-	a := make(map[string]string)
-	a["name"] = "no"
-	fmt.Println(a)
+	var a *string
+	var b string
+	*a = "111"
+	b = "222"
+	if *a != b {
+		return
+	}
 }

@@ -82,5 +82,52 @@ func UpdateDetailOfRelatedParty(paramIn RelatedParty) serializer.CommonResponse 
 		Code:    code.Success,
 		Message: code.GetErrorMessage(code.Success),
 	}
+}
 
+func CreateRelatedParty(paramIn RelatedParty) serializer.CommonResponse {
+	var record model.RelatedParty
+	if *paramIn.ChineseName != "" {
+		record.ChineseName = paramIn.ChineseName
+	}
+	if *paramIn.EnglishName != "" {
+		record.EnglishName = paramIn.EnglishName
+	}
+	if *paramIn.SupplierCode != "" {
+		record.SupplierCode = paramIn.SupplierCode
+	}
+	if *paramIn.Address != "" {
+		record.Address = paramIn.Address
+	}
+	if *paramIn.Telephone != "" {
+		record.Telephone = paramIn.Telephone
+	}
+	result := util.DB.Debug().Save(&record)
+	if result.Error != nil {
+		return serializer.CommonResponse{
+			Data:    nil,
+			Code:    code.Error,
+			Message: result.Error.Error(),
+		}
+	}
+	return serializer.CommonResponse{
+		Data:    nil,
+		Code:    code.Success,
+		Message: code.GetErrorMessage(code.Success),
+	}
+}
+
+func DeleteRelatedParty(id int64) serializer.CommonResponse {
+	result := util.DB.Debug().Delete(&model.RelatedParty{}, id)
+	if result.Error != nil {
+		return serializer.CommonResponse{
+			Data:    nil,
+			Code:    code.Error,
+			Message: result.Error.Error(),
+		}
+	}
+	return serializer.CommonResponse{
+		Data:    nil,
+		Code:    code.Success,
+		Message: code.GetErrorMessage(code.Success),
+	}
 }

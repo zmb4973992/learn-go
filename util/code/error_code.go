@@ -8,6 +8,8 @@ const (
 	ErrorRecordNotFound int = 1001
 	// ErrorNotEnoughParameters 没有足够的参数
 	ErrorNotEnoughParameters int = 1002
+	// ErrorInvalidParameters 参数无效
+	ErrorInvalidParameters int = 1003
 
 	ErrorUsernameOrPasswordExist int = 2001
 	ErrorUsernameExist           int = 2002
@@ -22,6 +24,7 @@ var ErrorMessage = map[int]string{
 
 	ErrorRecordNotFound:      "未找到指定记录",
 	ErrorNotEnoughParameters: "没有足够的参数",
+	ErrorInvalidParameters:   "参数无效",
 
 	ErrorUsernameOrPasswordExist: "用户名或密码错误",
 	ErrorUsernameExist:           "用户名已存在",
