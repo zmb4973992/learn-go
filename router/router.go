@@ -22,11 +22,11 @@ func InitRouter() *gin.Engine {
 		}
 		user := api.Group("/user")
 		{
-			user.GET("/list")
-			user.GET("/:id", controller.GetUser)
-			//user.PUT("/:id", controller.UpdateUser)
-			user.POST("/", controller.CreateUser)
-			//user.DELETE("/:id", controller.DeleteUser)
+			user.GET("/list", controller.GetUserList)  //获取用户列表
+			user.GET("/:id", controller.GetUser)       //获取用户详情
+			user.PUT("/:id", controller.UpdateUser)    //修改用户
+			user.POST("/", controller.CreateUser)      //添加用户
+			user.DELETE("/:id", controller.DeleteUser) //删除用户
 		}
 		relatedParty := api.Group("/related_party")
 		{

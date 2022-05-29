@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/google/uuid v1.3.0
 	go.uber.org/zap v1.21.0
 	gopkg.in/ini.v1 v1.66.4
 	gorm.io/driver/sqlserver v1.3.2

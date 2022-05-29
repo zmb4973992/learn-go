@@ -6,11 +6,11 @@ import (
 	"learn-go/model"
 	"learn-go/serializer"
 	"learn-go/util"
-	"learn-go/util/code"
+	"learn-go/util/status"
 	"time"
 )
 
-type RelatedParty struct {
+type RelatedPartyService struct {
 	ID                      int64
 	ChineseName             *string    `form:"chinese_name" binding:"required"`
 	EnglishName             *string    `form:"english_name" binding:"required"`
@@ -18,49 +18,76 @@ type RelatedParty struct {
 	Address                 *string    `form:"address" binding:"required"`
 	UniformSocialCreditCode *string    `form:"uniform_social_credit_code" binding:"required"` //统一社会信用代码
 	Telephone               *string    `form:"telephone" binding:"required"`
+	File                    *string    `form:"file"`
+	Files                   *[]string  `form:"files"`
 	CreatedAt               *time.Time `form:"created_at"`
 	UpdatedAt               *time.Time `form:"updated_at"`
 }
 
-func GetListOfRelatedParty(paginationRule util.PaginationRule) (*serializer.CommonResponse, error) {
-	var list []*model.RelatedParty
-	if paginationRule.Page <= 0 {
-		paginationRule.Page = 1
+func GetRelatedPartyList(paginationRule util.PagingRule) serializer.ResponseForList {
+	var list []RelatedPartyService
+	if paginationRule.CurrentPage <= 0 {
+		paginationRule.CurrentPage = 1
 	}
 	if paginationRule.PageSize <= 0 || paginationRule.PageSize > 100 {
 		paginationRule.PageSize = 20
 	}
-	util.DB.Debug().Scopes(util.Paginate(&paginationRule)).Find(&list)
-	return &serializer.CommonResponse{
+	res := util.DB.Debug().Scopes(util.PaginateBy(paginationRule)).Model(&model.RelatedParty{}).Find(&list)
+	if res.Error != nil {
+		return serializer.ResponseForList{
+			Data:    nil,
+			Paging:  nil,
+			Code:    status.Error,
+			Message: status.GetMessage(status.Error),
+		}
+	}
+	if res.RowsAffected == 0 {
+		return serializer.ResponseForList{
+			Data:    nil,
+			Paging:  nil,
+			Code:    status.ErrorRecordNotFound,
+			Message: status.GetMessage(status.ErrorRecordNotFound),
+		}
+	}
+	var total int64
+	util.DB.Debug().Model(&model.RelatedParty{}).Find(&list).Count(&total)
+	return serializer.ResponseForList{
 		Data: list,
-	}, nil
+		Paging: serializer.ResponseForPaging{
+			CurrentPage: paginationRule.CurrentPage,
+			PageSize:    paginationRule.PageSize,
+			TotalPage:   util.GetTotalPage(int(total), paginationRule.PageSize),
+		},
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
+	}
 }
 
-func GetDetailOfRelatedParty(id int64) (*serializer.CommonResponse, error) {
+func GetDetailOfRelatedParty(id int64) (*serializer.ResponseForDetail, error) {
 	var record *model.RelatedParty
 	result := util.DB.Debug().Where("id=?", id).First(&record)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return &serializer.CommonResponse{
+		return &serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    code.ErrorRecordNotFound,
-			Message: code.GetErrorMessage(code.ErrorRecordNotFound),
+			Code:    status.ErrorRecordNotFound,
+			Message: status.GetMessage(status.ErrorRecordNotFound),
 		}, nil
 	}
-	return &serializer.CommonResponse{
+	return &serializer.ResponseForDetail{
 		Data:    record,
-		Code:    code.Success,
-		Message: code.GetErrorMessage(code.Success),
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
 	}, nil
 }
 
-func UpdateDetailOfRelatedParty(paramIn RelatedParty) serializer.CommonResponse {
+func UpdateDetailOfRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetail {
 	var record model.RelatedParty
 	result := util.DB.Debug().First(&record, paramIn.ID)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return serializer.CommonResponse{
+		return serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    code.ErrorRecordNotFound,
-			Message: code.GetErrorMessage(code.ErrorRecordNotFound),
+			Code:    status.ErrorRecordNotFound,
+			Message: status.GetMessage(status.ErrorRecordNotFound),
 		}
 	}
 	record.ChineseName = paramIn.ChineseName
@@ -71,20 +98,20 @@ func UpdateDetailOfRelatedParty(paramIn RelatedParty) serializer.CommonResponse 
 	record.Telephone = paramIn.Telephone
 	result = util.DB.Debug().Save(&record)
 	if result.Error != nil {
-		return serializer.CommonResponse{
+		return serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    code.Error,
-			Message: code.GetErrorMessage(code.Error),
+			Code:    status.Error,
+			Message: status.GetMessage(status.Error),
 		}
 	}
-	return serializer.CommonResponse{
+	return serializer.ResponseForDetail{
 		Data:    nil,
-		Code:    code.Success,
-		Message: code.GetErrorMessage(code.Success),
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
 	}
 }
 
-func CreateRelatedParty(paramIn RelatedParty) serializer.CommonResponse {
+func CreateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetail {
 	var record model.RelatedParty
 	if *paramIn.ChineseName != "" {
 		record.ChineseName = paramIn.ChineseName
@@ -103,31 +130,31 @@ func CreateRelatedParty(paramIn RelatedParty) serializer.CommonResponse {
 	}
 	result := util.DB.Debug().Save(&record)
 	if result.Error != nil {
-		return serializer.CommonResponse{
+		return serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    code.Error,
+			Code:    status.Error,
 			Message: result.Error.Error(),
 		}
 	}
-	return serializer.CommonResponse{
+	return serializer.ResponseForDetail{
 		Data:    nil,
-		Code:    code.Success,
-		Message: code.GetErrorMessage(code.Success),
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
 	}
 }
 
-func DeleteRelatedParty(id int64) serializer.CommonResponse {
+func DeleteRelatedParty(id int64) serializer.ResponseForDetail {
 	result := util.DB.Debug().Delete(&model.RelatedParty{}, id)
 	if result.Error != nil {
-		return serializer.CommonResponse{
+		return serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    code.Error,
-			Message: result.Error.Error(),
+			Code:    status.ErrorFailToDeleteRecord,
+			Message: status.GetMessage(status.ErrorFailToDeleteRecord),
 		}
 	}
-	return serializer.CommonResponse{
+	return serializer.ResponseForDetail{
 		Data:    nil,
-		Code:    code.Success,
-		Message: code.GetErrorMessage(code.Success),
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
 	}
 }

@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"learn-go/serializer"
 	"learn-go/service"
-	"learn-go/util/code"
 	"learn-go/util/jwt"
+	"learn-go/util/status"
 	"net/http"
 )
 
@@ -13,12 +13,12 @@ func Login(c *gin.Context) {
 	var s service.UserLoginService
 	err := c.ShouldBind(&s)
 	if err != nil {
-		res := serializer.CommonResponse{
-			Code:    code.Error,
+		res := serializer.ResponseForDetail{
+			Code:    status.Error,
 			Data:    nil,
-			Message: code.GetErrorMessage(code.Error),
+			Message: status.GetMessage(status.Error),
 		}
-		c.JSON(code.Error, res)
+		c.JSON(status.Error, res)
 		return
 	}
 

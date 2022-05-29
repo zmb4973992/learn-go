@@ -5,7 +5,7 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-type Config struct {
+type DBConfig struct {
 	AppMode    string
 	HttpPort   string
 	DbHost     string
@@ -24,11 +24,16 @@ type LogConfig struct {
 	RelativePath string
 }
 
+type UploadConfig struct {
+	FullPath string
+}
+
 // MyConfig 结构体实例化
 var (
-	MyConfig    = new(Config)
-	MyJWTConfig = new(JWTConfig)
-	MyLogConfig = new(LogConfig)
+	MyConfig       = new(DBConfig)
+	MyJWTConfig    = new(JWTConfig)
+	MyLogConfig    = new(LogConfig)
+	MyUploadConfig = new(UploadConfig)
 )
 
 func LoadConfig() {
@@ -53,4 +58,7 @@ func LoadConfig() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	MyUploadConfig.FullPath = config.Section("upload_files").Key("FullPath").MustString("D:/test/upload_files") + "/" //config中不填的话会有默认值
+
 }

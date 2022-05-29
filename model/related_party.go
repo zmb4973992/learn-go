@@ -12,6 +12,8 @@ type RelatedParty struct {
 	Address                 *string
 	UniformSocialCreditCode *string //统一社会信用代码
 	Telephone               *string
+	File                    *string  `form:"file"`
+	Files                   []string `form:"files"`
 	CreatedAt               *time.Time
 	UpdatedAt               *time.Time
 	Project                 []Project `gorm:"foreignkey:RelatedPartyID;constraint:OnUpdate:CASCADE;"`
