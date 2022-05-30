@@ -9,6 +9,7 @@ import (
 func InitRouter() *gin.Engine {
 	//使用gin框架，生成默认的空引擎
 	engine := gin.Default()
+	engine.MaxMultipartMemory = 512 << 20 //512MB
 	//挂载自定义中间件
 	//engine.Use(middleware.MyMiddlewareTest())
 	//依次加载所有的路由组

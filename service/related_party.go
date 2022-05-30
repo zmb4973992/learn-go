@@ -7,21 +7,21 @@ import (
 	"learn-go/serializer"
 	"learn-go/util"
 	"learn-go/util/status"
+	"mime/multipart"
 	"time"
 )
 
 type RelatedPartyService struct {
 	ID                      int64
-	ChineseName             *string    `form:"chinese_name" binding:"required"`
-	EnglishName             *string    `form:"english_name" binding:"required"`
-	SupplierCode            *string    `form:"supplier_code" binding:"required"`
-	Address                 *string    `form:"address" binding:"required"`
-	UniformSocialCreditCode *string    `form:"uniform_social_credit_code" binding:"required"` //统一社会信用代码
-	Telephone               *string    `form:"telephone" binding:"required"`
-	File                    *string    `form:"file"`
-	Files                   *[]string  `form:"files"`
-	CreatedAt               *time.Time `form:"created_at"`
-	UpdatedAt               *time.Time `form:"updated_at"`
+	ChineseName             *string               `form:"chinese_name"`
+	EnglishName             *string               `form:"english_name" `
+	SupplierCode            *string               `form:"supplier_code" `
+	Address                 *string               `form:"address" `
+	UniformSocialCreditCode *string               `form:"uniform_social_credit_code" ` //统一社会信用代码
+	Telephone               *string               `form:"telephone" `
+	File                    *multipart.FileHeader `form:"file123"`
+	CreatedAt               *time.Time            `form:"created_at"`
+	UpdatedAt               *time.Time            `form:"updated_at"`
 }
 
 func GetRelatedPartyList(paginationRule util.PagingRule) serializer.ResponseForList {
