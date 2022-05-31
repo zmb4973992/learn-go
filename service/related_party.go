@@ -7,21 +7,21 @@ import (
 	"learn-go/serializer"
 	"learn-go/util"
 	"learn-go/util/status"
-	"mime/multipart"
 	"time"
 )
 
 type RelatedPartyService struct {
 	ID                      int64
-	ChineseName             *string               `form:"chinese_name"`
-	EnglishName             *string               `form:"english_name" `
-	SupplierCode            *string               `form:"supplier_code" `
-	Address                 *string               `form:"address" `
-	UniformSocialCreditCode *string               `form:"uniform_social_credit_code" ` //统一社会信用代码
-	Telephone               *string               `form:"telephone" `
-	File                    *multipart.FileHeader `form:"file"`
-	CreatedAt               *time.Time            `form:"created_at"`
-	UpdatedAt               *time.Time            `form:"updated_at"`
+	ChineseName             *string    `form:"chinese_name"`
+	EnglishName             *string    `form:"english_name" `
+	SupplierCode            *string    `form:"supplier_code" `
+	Address                 *string    `form:"address" `
+	UniformSocialCreditCode *string    `form:"uniform_social_credit_code" ` //统一社会信用代码
+	Telephone               *string    `form:"telephone" `
+	File                    *string    `form:"-"`
+	Files                   *string    `form:"-"`
+	CreatedAt               *time.Time `form:"created_at"`
+	UpdatedAt               *time.Time `form:"updated_at"`
 }
 
 func GetRelatedPartyList(paginationRule util.PagingRule) serializer.ResponseForList {
@@ -80,7 +80,7 @@ func GetDetailOfRelatedParty(id int64) (*serializer.ResponseForDetail, error) {
 	}, nil
 }
 
-func UpdateDetailOfRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetail {
+func UpdateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetail {
 	var record model.RelatedParty
 	result := util.DB.Debug().First(&record, paramIn.ID)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -113,34 +113,32 @@ func UpdateDetailOfRelatedParty(paramIn RelatedPartyService) serializer.Response
 
 func CreateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetail {
 	var record model.RelatedParty
-	if *paramIn.ChineseName != "" {
+	if paramIn.ChineseName != nil && *paramIn.ChineseName != "" {
 		record.ChineseName = paramIn.ChineseName
 	}
-	if *paramIn.EnglishName != "" {
+	if paramIn.EnglishName != nil && *paramIn.EnglishName != "" {
 		record.EnglishName = paramIn.EnglishName
 	}
-	if *paramIn.SupplierCode != "" {
+	if paramIn.SupplierCode != nil && *paramIn.SupplierCode != "" {
 		record.SupplierCode = paramIn.SupplierCode
 	}
-	if *paramIn.Address != "" {
+	if paramIn.Address != nil && *paramIn.Address != "" {
 		record.Address = paramIn.Address
 	}
-	if *paramIn.Telephone != "" {
+	if paramIn.UniformSocialCreditCode != nil && *paramIn.UniformSocialCreditCode != "" {
+		record.UniformSocialCreditCode = paramIn.UniformSocialCreditCode
+	}
+	if paramIn.Telephone != nil && *paramIn.Telephone != "" {
 		record.Telephone = paramIn.Telephone
 	}
-	result := util.DB.Debug().Save(&record)
+	if paramIn.File != nil && *paramIn.File != "" {
+		record.File = paramIn.File
+	}
+	result := util.DB.Debug().Create(&record)
 	if result.Error != nil {
-		return serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.Error,
-			Message: result.Error.Error(),
-		}
+		return serializer.NewResponseForDetail(status.Error)
 	}
-	return serializer.ResponseForDetail{
-		Data:    nil,
-		Code:    status.Success,
-		Message: status.GetMessage(status.Success),
-	}
+	return serializer.NewResponseForDetail(status.Success)
 }
 
 func DeleteRelatedParty(id int64) serializer.ResponseForDetail {

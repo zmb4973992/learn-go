@@ -6,7 +6,6 @@ import (
 	"learn-go/service"
 	"learn-go/util"
 	"learn-go/util/status"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -38,19 +37,25 @@ func UpdateRelatedParty(c *gin.Context) {
 		return
 	}
 	paramIn.ID, _ = strconv.ParseInt(c.Param("id"), 10, 64) //把uri上的id参数传递给结构体形式的入参
-	res := service.UpdateDetailOfRelatedParty(paramIn)
+	res := service.UpdateRelatedParty(paramIn)
 	c.JSON(200, res)
 }
 
 func CreateRelatedParty(c *gin.Context) {
-	var service service.RelatedPartyService
-	err := c.ShouldBind(&service)
+	var s service.RelatedPartyService
+	err := c.ShouldBind(&s)
 	if err != nil {
-		log.Println(err)
-	} else {
-		log.Println(service.File.Filename)
+		c.JSON(http.StatusBadRequest, serializer.NewResponseForDetail(status.ErrorInvalidFormDataParameters))
+		return
 	}
+	filename := util.UploadSingleFile(c, "file")
+	if filename != nil {
+		s.File = filename //这里不用return，继续往下执行
+	}
+	//res := service.CreateRelatedParty(s)
+	//c.JSON(http.StatusOK, res)
 
+	util.UploadMultipleFiles(c, "files")
 }
 
 //多文件上传
@@ -76,8 +81,6 @@ func CreateRelatedParty(c *gin.Context) {
 //	})
 //	return
 //}
-//res := service.CreateRelatedParty(paramIn)
-//c.JSON(http.StatusOK, res)
 
 func DeleteRelatedParty(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)

@@ -9,7 +9,6 @@ import (
 func InitRouter() *gin.Engine {
 	//使用gin框架，生成默认的空引擎
 	engine := gin.Default()
-	//engine.MaxMultipartMemory = 512 << 20 //512MB
 	//挂载自定义中间件
 	//engine.Use(middleware.MyMiddlewareTest())
 	//依次加载所有的路由组
@@ -34,7 +33,7 @@ func InitRouter() *gin.Engine {
 			relatedParty.GET("/list", controller.GetRelatedPartyList)  //获取列表
 			relatedParty.GET("/:id", controller.GetRelatedParty)       //获取详情
 			relatedParty.PUT("/:id", controller.UpdateRelatedParty)    //修改详情
-			relatedParty.POST("", controller.CreateRelatedParty)       //添加详情
+			relatedParty.POST("", controller.CreateRelatedParty)       //添加相关方详情
 			relatedParty.DELETE("/:id", controller.DeleteRelatedParty) //删除详情
 		}
 

@@ -22,7 +22,7 @@ func main() {
 	engine := router.InitRouter()
 	err := engine.Run(":" + util.MyConfig.HttpPort)
 	if err != nil {
-		panic("端口错误或未知错误...")
+		panic(err)
 	}
 
 }

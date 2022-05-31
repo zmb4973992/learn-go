@@ -1,9 +1,14 @@
 package main
 
-import "fmt"
+import "log"
 
 func main() {
-	var a []string
-	a = make([]string, 5)
-	fmt.Println(a)
+	var a *string
+	if a == nil || *a == "hello" {
+		log.Print("通过1")
+	}
+	if *a == "hello" || a == nil {
+		log.Print("通过2")
+	}
+
 }

@@ -44,7 +44,7 @@ var Message = map[int]string{
 func GetMessage(code int) string {
 	message, ok := Message[code]
 	if !ok {
-		return "获取错误信息失败，请检查status/code_and_message相关配置"
+		return "错误代码未定义返回信息，获取错误信息失败，请检查status/code_and_message相关配置"
 	}
 	return message
 }
