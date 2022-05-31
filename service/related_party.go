@@ -19,7 +19,7 @@ type RelatedPartyService struct {
 	Address                 *string               `form:"address" `
 	UniformSocialCreditCode *string               `form:"uniform_social_credit_code" ` //统一社会信用代码
 	Telephone               *string               `form:"telephone" `
-	File                    *multipart.FileHeader `form:"file123"`
+	File                    *multipart.FileHeader `form:"file"`
 	CreatedAt               *time.Time            `form:"created_at"`
 	UpdatedAt               *time.Time            `form:"updated_at"`
 }

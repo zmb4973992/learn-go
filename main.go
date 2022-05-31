@@ -4,10 +4,12 @@ import (
 	"learn-go/router"
 	"learn-go/util"
 	"learn-go/util/logging"
+	"log"
 )
 
 //test
 func main() {
+	log.Print("111")
 
 	//加载配置
 	util.LoadConfig()

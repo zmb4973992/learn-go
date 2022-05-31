@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"learn-go/serializer"
 	"learn-go/service"
@@ -44,11 +43,12 @@ func UpdateRelatedParty(c *gin.Context) {
 }
 
 func CreateRelatedParty(c *gin.Context) {
-	file, err := c.FormFile("filename")
+	var service service.RelatedPartyService
+	err := c.ShouldBind(&service)
 	if err != nil {
 		log.Println(err)
 	} else {
-		fmt.Println(file.Filename)
+		log.Println(service.File.Filename)
 	}
 
 }
