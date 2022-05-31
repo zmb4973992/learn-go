@@ -4,10 +4,12 @@ import (
 	"learn-go/router"
 	"learn-go/util"
 	"learn-go/util/logging"
+	"log"
 )
 
 //test
 func main() {
+	log.Print("111")
 
 	//加载配置
 	util.LoadConfig()
@@ -20,7 +22,7 @@ func main() {
 	engine := router.InitRouter()
 	err := engine.Run(":" + util.MyConfig.HttpPort)
 	if err != nil {
-		panic("端口错误或未知错误...")
+		panic(err)
 	}
 
 }

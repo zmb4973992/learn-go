@@ -26,6 +26,7 @@ type LogConfig struct {
 
 type UploadConfig struct {
 	FullPath string
+	MaxSize  int64
 }
 
 // MyConfig 结构体实例化
@@ -60,5 +61,5 @@ func LoadConfig() {
 	}
 
 	MyUploadConfig.FullPath = config.Section("upload_files").Key("FullPath").MustString("D:/test/upload_files") + "/" //config中不填的话会有默认值
-
+	MyUploadConfig.MaxSize = config.Section("upload_files").Key("MaxSize").MustInt64(10 << 20)
 }
