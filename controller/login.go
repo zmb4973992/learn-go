@@ -10,28 +10,20 @@ import (
 )
 
 func Login(c *gin.Context) {
-	var s service.UserLoginService
+	var s service.UserService
 	err := c.ShouldBind(&s)
 	if err != nil {
 		res := serializer.ResponseForDetail{
-			Code:    status.Error,
+			Code:    status.ErrorInvalidFormDataParameters,
 			Data:    nil,
-			Message: status.GetMessage(status.Error),
+			Message: status.GetMessage(status.ErrorInvalidFormDataParameters),
 		}
 		c.JSON(status.Error, res)
 		return
 	}
 
 	res := s.Login()
-	token := jwt.GenerateToken(s.Username)
+	token := jwt.GenerateToken(*s.Username)
 	c.Header("authorization", token)
 	c.JSON(http.StatusOK, res)
-}
-
-func ParseTokenTest(c *gin.Context) {
-	u, _ := c.Get("username")
-	c.JSON(http.StatusOK, gin.H{
-		"n": u,
-	})
-
 }

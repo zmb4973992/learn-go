@@ -17,11 +17,13 @@ const (
 	// ErrorFailToDeleteRecord 删除记录失败
 	ErrorFailToDeleteRecord int = 1006
 
-	ErrorUsernameOrPasswordExist int = 2001
-	ErrorUsernameExist           int = 2002
-	ErrorPasswordIncorrect       int = 2003
+	ErrorInvalidUsernameOrPassword int = 2001
+	ErrorUsernameExist             int = 2002
+	ErrorPasswordIncorrect         int = 2003
 
 	ErrorTokenInvalid int = 3001
+
+	ErrorFailToEncrypt int = 4001
 )
 
 var Message = map[int]string{
@@ -35,10 +37,13 @@ var Message = map[int]string{
 	ErrorFailToSaveRecord:          "保存记录失败",
 	ErrorFailToDeleteRecord:        "删除记录失败",
 
-	ErrorUsernameOrPasswordExist: "用户名或密码错误",
-	ErrorUsernameExist:           "用户名已存在",
-	ErrorPasswordIncorrect:       "密码错误",
-	ErrorTokenInvalid:            "token无效",
+	ErrorInvalidUsernameOrPassword: "用户名或密码错误",
+	ErrorUsernameExist:             "用户名已存在",
+	ErrorPasswordIncorrect:         "密码错误",
+
+	ErrorTokenInvalid: "token无效",
+
+	ErrorFailToEncrypt: "加密失败",
 }
 
 func GetMessage(code int) string {

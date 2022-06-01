@@ -11,27 +11,31 @@ import (
 	"learn-go/util/status"
 )
 
-type UserLoginService struct {
-	Username string `form:"username" json:"username" binding:"required"`
-	Password string `form:"password" json:"password" binding:"required"`
-}
-
 type UserService struct {
 	ID       int64   `form:"id" json:"id"`
 	Username *string `form:"username" json:"username" binding:"required"`
 	Password *string `form:"password" json:"-"  binding:"required"`
 }
 
-func (s *UserLoginService) Login() serializer.ResponseForDetail {
+func (s *UserService) Login() serializer.ResponseForDetail {
 	var user model.User
-	res := util.DB.Where("username=? and password=?", s.Username, s.Password).First(&user)
+	//根据入参的用户名，从数据库取出记录赋值给user
+	res := util.DB.Where("username=?", s.Username).First(&user)
+	//如果没有找到记录
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return serializer.ResponseForDetail{
-			Code:    status.ErrorUsernameOrPasswordExist,
-			Message: status.GetMessage(status.ErrorUsernameOrPasswordExist),
+			Code:    status.ErrorInvalidUsernameOrPassword,
+			Message: status.GetMessage(status.ErrorInvalidUsernameOrPassword),
 		}
 	}
-
+	//如果找到记录了，但是密码错误的话
+	if util.CheckPassword(*s.Password, *user.Password) == false {
+		return serializer.ResponseForDetail{
+			Code:    status.ErrorInvalidUsernameOrPassword,
+			Message: status.GetMessage(status.ErrorInvalidUsernameOrPassword),
+		}
+	}
+	//账号密码都正确时，生成token
 	token := jwt.GenerateToken(*user.Username)
 	return serializer.ResponseForDetail{
 		Data: serializer.UserLoginResponse{
@@ -70,7 +74,11 @@ func CreateUser(paramIn UserService) serializer.ResponseForDetail {
 		}
 	}
 	record.Username = paramIn.Username
-	record.Password = paramIn.Password
+	encryptedPassword, err := util.EncryptPassword(*paramIn.Password)
+	if err != nil {
+		return serializer.NewResponseForDetail(status.ErrorFailToEncrypt)
+	}
+	record.Password = &encryptedPassword
 	res := util.DB.Debug().Create(&record)
 	if res.Error != nil {
 		return serializer.ResponseForDetail{
@@ -132,16 +140,16 @@ func DeleteUser(id int64) serializer.ResponseForDetail {
 	}
 }
 
-func GetUserList(paginationRule util.PagingRule) serializer.ResponseForDetail {
+func GetUserList(paginationRule Paging) serializer.ResponseForDetail {
 	var list []UserService
 	fmt.Println(list)
-	if paginationRule.CurrentPage <= 0 {
-		paginationRule.CurrentPage = 1
+	if paginationRule.Page <= 0 {
+		paginationRule.Page = 1
 	}
 	if paginationRule.PageSize <= 0 || paginationRule.PageSize > 100 {
 		paginationRule.PageSize = 20
 	}
-	util.DB.Debug().Scopes(util.PaginateBy(paginationRule)).Model(&model.User{}).Find(&list)
+	util.DB.Debug().Scopes(PaginateBy(paginationRule)).Model(&model.User{}).Find(&list)
 	return serializer.ResponseForDetail{
 		Data:    list,
 		Code:    status.Success,

@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"learn-go/model"
 	"learn-go/serializer"
@@ -22,17 +23,25 @@ type RelatedPartyService struct {
 	Files                   *string    `form:"-"`
 	CreatedAt               *time.Time `form:"created_at"`
 	UpdatedAt               *time.Time `form:"updated_at"`
+	Paging                  Paging     `json:"-"`
 }
 
-func GetRelatedPartyList(paginationRule util.PagingRule) serializer.ResponseForList {
+func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
+	if s.Paging.Page <= 0 {
+		s.Paging.Page = 1
+	}
+	if s.Paging.PageSize <= 0 || s.Paging.PageSize > 100 {
+		s.Paging.PageSize = 20
+	}
 	var list []RelatedPartyService
-	if paginationRule.CurrentPage <= 0 {
-		paginationRule.CurrentPage = 1
-	}
-	if paginationRule.PageSize <= 0 || paginationRule.PageSize > 100 {
-		paginationRule.PageSize = 20
-	}
-	res := util.DB.Debug().Scopes(util.PaginateBy(paginationRule)).Model(&model.RelatedParty{}).Find(&list)
+	res := util.DB.Debug().Scopes(PaginateBy(s.Paging)).
+		Model(&model.RelatedParty{}).
+		Where("chinese_name=?", s.ChineseName).
+		Find(&list)
+	var temp int64
+	util.DB.Debug().
+		Model(&model.RelatedParty{}).
+		Where("chinese_name=?", s.ChineseName).Count(&temp)
 	if res.Error != nil {
 		return serializer.ResponseForList{
 			Data:    nil,
@@ -49,14 +58,14 @@ func GetRelatedPartyList(paginationRule util.PagingRule) serializer.ResponseForL
 			Message: status.GetMessage(status.ErrorRecordNotFound),
 		}
 	}
-	var total int64
-	util.DB.Debug().Model(&model.RelatedParty{}).Find(&list).Count(&total)
+	fmt.Println(res.RowsAffected)
+	fmt.Println(temp)
 	return serializer.ResponseForList{
 		Data: list,
 		Paging: serializer.ResponseForPaging{
-			CurrentPage: paginationRule.CurrentPage,
-			PageSize:    paginationRule.PageSize,
-			TotalPage:   util.GetTotalPage(int(total), paginationRule.PageSize),
+			CurrentPage: s.Paging.Page,
+			PageSize:    s.Paging.PageSize,
+			TotalPage:   GetTotalPage(int(temp), s.Paging.PageSize),
 		},
 		Code:    status.Success,
 		Message: status.GetMessage(status.Success),

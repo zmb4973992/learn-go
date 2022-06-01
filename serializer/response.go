@@ -16,14 +16,14 @@ type ResponseForList struct {
 }
 
 type ResponseForPaging struct {
-	CurrentPage int `json:"current_page"`
-	PageSize    int `json:"pagesize"`
+	CurrentPage int `json:"page"`
+	PageSize    int `json:"page_size"`
 	TotalPage   int `json:"total_page"`
 }
 
 type UserLoginResponse struct {
-	Username string
-	Token    string
+	Username string `json:"username"`
+	Token    string `json:"token"`
 }
 
 func NewResponseForDetail(statusCode int) ResponseForDetail {
