@@ -11,10 +11,10 @@ import (
 )
 
 func GetRelatedPartyList(c *gin.Context) {
-	var paginationRule util.PagingRule
-	c.ShouldBind(&paginationRule)
-	var response serializer.ResponseForList
-	response = service.GetRelatedPartyList(paginationRule)
+	var s service.RelatedPartyService
+	c.ShouldBind(&s)
+	//var response serializer.ResponseForList
+	response := service.GetRelatedPartyList(s)
 	c.JSON(http.StatusOK, response)
 }
 

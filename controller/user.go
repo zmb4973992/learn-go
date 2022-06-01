@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"learn-go/serializer"
 	"learn-go/service"
-	"learn-go/util"
 	"learn-go/util/status"
 	"net/http"
 	"strconv"
@@ -86,7 +85,7 @@ func DeleteUser(c *gin.Context) {
 }
 
 func GetUserList(c *gin.Context) {
-	var paginationRule util.PagingRule
+	var paginationRule service.Paging
 	err := c.ShouldBind(&paginationRule) //不需要处理错误，如果绑定不上，下面的方法会自动使用默认值
 	if err != nil {
 	}
