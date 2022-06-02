@@ -26,7 +26,19 @@ type UserLoginResponse struct {
 	Token    string `json:"token"`
 }
 
-func NewResponseForDetail(statusCode int) ResponseForDetail {
+// NewResponseForCreationResult 创建记录后，自动生成返回结果
+func NewResponseForCreationResult(statusCode int, ID int) ResponseForDetail {
+	return ResponseForDetail{
+		Data: map[string]any{
+			"ID": ID,
+		},
+		Code:    statusCode,
+		Message: status.GetMessage(statusCode),
+	}
+}
+
+// NewErrorResponse 创建记录后，自动生成返回结果
+func NewErrorResponse(statusCode int) ResponseForDetail {
 	return ResponseForDetail{
 		Data:    nil,
 		Code:    statusCode,

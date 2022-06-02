@@ -69,14 +69,14 @@ func CreateUser(paramIn UserService) serializer.ResponseForDetail {
 	if *paramIn.Username == "" || *paramIn.Password == "" {
 		return serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    status.ErrorNotEnoughParameters,
-			Message: status.GetMessage(status.ErrorNotEnoughParameters),
+			Code:    status.ErrorInvalidFormDataParameters,
+			Message: status.GetMessage(status.ErrorInvalidFormDataParameters),
 		}
 	}
 	record.Username = paramIn.Username
 	encryptedPassword, err := util.EncryptPassword(*paramIn.Password)
 	if err != nil {
-		return serializer.NewResponseForDetail(status.ErrorFailToEncrypt)
+		serializer.NewErrorResponse(status.ErrorFailToEncrypt)
 	}
 	record.Password = &encryptedPassword
 	res := util.DB.Debug().Create(&record)

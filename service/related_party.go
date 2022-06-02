@@ -12,7 +12,7 @@ import (
 )
 
 type RelatedPartyService struct {
-	ID                      int64
+	ID                      int
 	ChineseName             *string    `form:"chinese_name"`
 	EnglishName             *string    `form:"english_name" `
 	SupplierCode            *string    `form:"supplier_code" `
@@ -101,7 +101,6 @@ func UpdateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetai
 	}
 	record.ChineseName = paramIn.ChineseName
 	record.EnglishName = paramIn.EnglishName
-	record.SupplierCode = paramIn.SupplierCode
 	record.Address = paramIn.Address
 	record.UniformSocialCreditCode = paramIn.UniformSocialCreditCode
 	record.Telephone = paramIn.Telephone
@@ -128,9 +127,6 @@ func CreateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetai
 	if paramIn.EnglishName != nil && *paramIn.EnglishName != "" {
 		record.EnglishName = paramIn.EnglishName
 	}
-	if paramIn.SupplierCode != nil && *paramIn.SupplierCode != "" {
-		record.SupplierCode = paramIn.SupplierCode
-	}
 	if paramIn.Address != nil && *paramIn.Address != "" {
 		record.Address = paramIn.Address
 	}
@@ -143,11 +139,14 @@ func CreateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetai
 	if paramIn.File != nil && *paramIn.File != "" {
 		record.File = paramIn.File
 	}
+	if paramIn.Files != nil && *paramIn.Files != "" {
+		record.Files = paramIn.Files
+	}
 	result := util.DB.Debug().Create(&record)
 	if result.Error != nil {
-		return serializer.NewResponseForDetail(status.Error)
+		return serializer.NewResponseForCreationResult(status.ErrorFailToSaveRecord, record.ID)
 	}
-	return serializer.NewResponseForDetail(status.Success)
+	return serializer.NewResponseForCreationResult(status.Success, record.ID)
 }
 
 func DeleteRelatedParty(id int64) serializer.ResponseForDetail {

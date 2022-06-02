@@ -10,6 +10,7 @@ import (
 func InitRouter() *gin.Engine {
 	//使用gin框架，生成默认的空引擎
 	engine := gin.Default()
+	engine.POST("/test", controller.Test)
 	engine.Use(middleware.Cors())
 	engine.POST("/login", controller.Login)         //用户登录
 	engine.POST("/api/user", controller.CreateUser) //添加用户

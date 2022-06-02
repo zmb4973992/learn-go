@@ -30,6 +30,7 @@ func ConnectDB() {
 		&model.RelatedParty{},
 		&model.Project{},
 		&model.User{},
+		&model.Test{},
 	)
 	if err != nil {
 		panic(err)
