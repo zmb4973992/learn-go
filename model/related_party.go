@@ -5,21 +5,19 @@ import (
 )
 
 type RelatedParty struct {
-	ID                      int64
-	ChineseName             *string
-	EnglishName             *string
-	SupplierCode            *string
-	Address                 *string
+	ID                      int
+	ChineseName             *string //中文名称
+	EnglishName             *string //英文名称
+	Address                 *string //地址
 	UniformSocialCreditCode *string //统一社会信用代码
-	Telephone               *string
-	File                    *string //单一文件的文件名
-	Files                   *string //多个文件的文件名
+	Telephone               *string //电话
+	File                    *string //单一文件的文件名，测试用，后期记得删
+	Files                   *string //多个文件的文件名，测试用，后期记得删
 	CreatedAt               *time.Time
 	UpdatedAt               *time.Time
-	Project                 []Project `gorm:"foreignkey:RelatedPartyID;constraint:OnUpdate:CASCADE;"`
 }
 
-// TableName 将表名改为related_party
+// TableName 修改数据库的表名
 func (RelatedParty) TableName() string {
 	return "related_party"
 }

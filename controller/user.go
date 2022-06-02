@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"learn-go/serializer"
 	"learn-go/service"
@@ -12,18 +11,17 @@ import (
 
 // CreateUser 测试
 func CreateUser(c *gin.Context) {
-	var record *service.UserService
+	var record service.UserService
 	err := c.ShouldBind(&record)
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    status.Error,
-			Message: status.GetMessage(status.Error),
+			Code:    status.ErrorInvalidFormDataParameters,
+			Message: status.GetMessage(status.ErrorInvalidFormDataParameters),
 		})
 		return
 	}
-	fmt.Println(*record.Username)
-	res := service.CreateUser(*record)
+	res := service.CreateUser(record)
 	c.JSON(http.StatusOK, res)
 	return
 }

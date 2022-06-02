@@ -36,7 +36,7 @@ func UpdateRelatedParty(c *gin.Context) {
 		})
 		return
 	}
-	paramIn.ID, _ = strconv.ParseInt(c.Param("id"), 10, 64) //把uri上的id参数传递给结构体形式的入参
+	paramIn.ID, _ = strconv.Atoi(c.Param("id")) //把uri上的id参数传递给结构体形式的入参
 	res := service.UpdateRelatedParty(paramIn)
 	c.JSON(200, res)
 }
@@ -45,17 +45,19 @@ func CreateRelatedParty(c *gin.Context) {
 	var s service.RelatedPartyService
 	err := c.ShouldBind(&s)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, serializer.NewResponseForDetail(status.ErrorInvalidFormDataParameters))
+		c.JSON(http.StatusBadRequest, serializer.NewErrorResponse(status.ErrorInvalidFormDataParameters))
 		return
 	}
-	filename := util.UploadSingleFile(c, "file")
+	filename, _ := util.UploadSingleFile(c, "file")
 	if filename != nil {
-		s.File = filename //这里不用return，继续往下执行
+		s.File = filename
 	}
-	//res := service.CreateRelatedParty(s)
-	//c.JSON(http.StatusOK, res)
-
-	util.UploadMultipleFiles(c, "files")
+	filenames, _ := util.UploadMultipleFiles(c, "files")
+	if filenames != nil {
+		s.Files = filenames
+	}
+	res := service.CreateRelatedParty(s)
+	c.JSON(http.StatusOK, res)
 }
 
 //多文件上传
