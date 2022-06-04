@@ -4,12 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"learn-go/controller"
 	"learn-go/middleware"
+	"learn-go/util/logger"
 )
 
 // InitRouter 初始化路由器,最终返回*gin.Engine类型，给main调用
 func InitRouter() *gin.Engine {
 	//使用gin框架，生成默认的空引擎
-	engine := gin.Default()
+	engine := gin.New()
+	engine.Use(logger.ZapLogger(logger.ZapStandardLogger), gin.Recovery())
 	engine.POST("/test", controller.Test)
 	engine.Use(middleware.Cors())
 	engine.POST("/login", controller.Login)         //用户登录

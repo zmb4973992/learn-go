@@ -70,7 +70,7 @@ func CreateRelatedParty(c *gin.Context) {
 //for _, file := range files {
 //	id := uuid.New().String()
 //	file.Filename = id + file.Filename
-//	err = c.SaveUploadedFile(file, util.MyUploadConfig.FullPath+file.Filename)
+//	err = c.SaveUploadedFile(file, util.UploadConfig.FullPath+file.Filename)
 //	if err != nil {
 //		return
 //	}

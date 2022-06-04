@@ -14,7 +14,7 @@ var (
 
 func ConnectDB() {
 	//通过gorm连接sqlserver数据库
-	DB, err = gorm.Open(sqlserver.Open(MyConfig.Dsn), &gorm.Config{})
+	DB, err = gorm.Open(sqlserver.Open(DBConfig.Dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

@@ -5,9 +5,12 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-type DBConfig struct {
-	AppMode    string
-	HttpPort   string
+type generalConfig struct {
+	AppMode  string
+	HttpPort string
+}
+
+type dbConfig struct {
 	DbHost     string
 	DbPort     string
 	DbName     string
@@ -16,25 +19,28 @@ type DBConfig struct {
 	Dsn        string // Data Source Name 数据库连接字符串
 }
 
-type JWTConfig struct {
+type jwtConfig struct {
 	SecretKey []byte //这里不能用string，是jwt包的要求，否则报错
 }
 
-type LogConfig struct {
-	RelativePath string
+type logConfig struct {
+	FileName  string
+	MaxSize   int
+	MaxBackup int
+	MaxAge    int
 }
 
-type UploadConfig struct {
+type uploadConfig struct {
 	FullPath string
 	MaxSize  int64
 }
 
-// MyConfig 结构体实例化
 var (
-	MyConfig       = new(DBConfig)
-	MyJWTConfig    = new(JWTConfig)
-	MyLogConfig    = new(LogConfig)
-	MyUploadConfig = new(UploadConfig)
+	GeneralConfig = new(generalConfig)
+	DBConfig      = new(dbConfig)
+	JWTConfig     = new(jwtConfig)
+	LogConfig     = new(logConfig)
+	UploadConfig  = new(uploadConfig)
 )
 
 func LoadConfig() {
@@ -43,23 +49,24 @@ func LoadConfig() {
 		fmt.Println("配置文件路径错误：", err)
 		return
 	}
-	MyConfig.AppMode = config.Section("server").Key("AppMode").MustString("debug")  //config中不填的话就默认为debug
-	MyConfig.HttpPort = config.Section("server").Key("HttpPort").MustString("8000") //config中不填的话就默认为8000
-	MyConfig.DbHost = config.Section("database").Key("DbHost").String()
-	MyConfig.DbPort = config.Section("database").Key("DbPort").String()
-	MyConfig.DbName = config.Section("database").Key("DbName").String()
-	MyConfig.DbUsername = config.Section("database").Key("DbUser").String()
-	MyConfig.DbPassword = config.Section("database").Key("DbPassword").String()
-	MyConfig.Dsn = "sqlserver://" + MyConfig.DbUsername + ":" + MyConfig.DbPassword + "@" + MyConfig.DbHost + ":" + MyConfig.DbPort + "?database=" + MyConfig.DbName
+	GeneralConfig.AppMode = config.Section("general").Key("AppMode").MustString("debug")  //config中不填的话就默认为debug
+	GeneralConfig.HttpPort = config.Section("general").Key("HttpPort").MustString("8000") //config中不填的话就默认为8000
+
+	DBConfig.DbHost = config.Section("database").Key("DbHost").String()
+	DBConfig.DbPort = config.Section("database").Key("DbPort").String()
+	DBConfig.DbName = config.Section("database").Key("DbName").String()
+	DBConfig.DbUsername = config.Section("database").Key("DbUser").String()
+	DBConfig.DbPassword = config.Section("database").Key("DbPassword").String()
+	DBConfig.Dsn = "sqlserver://" + DBConfig.DbUsername + ":" + DBConfig.DbPassword + "@" + DBConfig.DbHost + ":" + DBConfig.DbPort + "?database=" + DBConfig.DbName
 
 	tempSecretKey := config.Section("jwt").Key("SecretKey").String() //配置里的密钥是string类型，jwt要求为[]byte类型，必须转换后才能使用，否则就为空
-	MyJWTConfig.SecretKey = []byte(tempSecretKey)
+	JWTConfig.SecretKey = []byte(tempSecretKey)
 
-	err = config.Section("log").MapTo(MyLogConfig)
-	if err != nil {
-		fmt.Println(err)
-	}
+	LogConfig.FileName = config.Section("log").Key("FileName").MustString("D:/test/log/status.log")
+	LogConfig.MaxSize = config.Section("log").Key("MaxSize").MustInt(1)
+	LogConfig.MaxBackup = config.Section("log").Key("MaxBackup").MustInt(1)
+	LogConfig.MaxAge = config.Section("log").Key("MaxAge").MustInt(1)
 
-	MyUploadConfig.FullPath = config.Section("upload_files").Key("FullPath").MustString("D:/test/upload_files") + "/" //config中不填的话会有默认值
-	MyUploadConfig.MaxSize = config.Section("upload_files").Key("MaxSize").MustInt64(10 << 20)
+	UploadConfig.FullPath = config.Section("upload_files").Key("FullPath").MustString("D:/test/upload_files") + "/"
+	UploadConfig.MaxSize = config.Section("upload_files").Key("MaxSize").MustInt64(10 << 20)
 }
