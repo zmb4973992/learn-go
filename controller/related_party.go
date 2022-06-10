@@ -19,7 +19,7 @@ type IRelatedPartyController interface {
 
 type relatedPartyController struct{}
 
-func (r relatedPartyController) NewRelatedPartyController() IRelatedPartyController {
+func NewRelatedPartyController() IRelatedPartyController {
 	return relatedPartyController{}
 }
 

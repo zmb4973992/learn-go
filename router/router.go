@@ -22,22 +22,20 @@ func InitRouter() *gin.Engine {
 		//api下都需要登录后操作
 		api.Use(middleware.JWT())
 		{
-			user := api.Group("/user")
-			{
-				user.GET("/list", controller.GetUserList)  //获取用户列表
-				user.GET("/:id", controller.GetUser)       //获取用户详情
-				user.PUT("/:id", controller.UpdateUser)    //修改用户
-				user.DELETE("/:id", controller.DeleteUser) //删除用户
-			}
-			relatedParty := api.Group("/related_party")
-			{
-				relatedParty.GET("/list", controller.GetRelatedPartyList)  //获取列表
-				relatedParty.GET("/:id", controller.GetRelatedParty)       //获取详情
-				relatedParty.PUT("/:id", controller.UpdateRelatedParty)    //修改详情
-				relatedParty.POST("", controller.CreateRelatedParty)       //添加相关方详情
-				relatedParty.DELETE("/:id", controller.DeleteRelatedParty) //删除详情
-			}
+
+			api.GET("/list", controller.GetUserList)  //获取用户列表
+			api.GET("/:id", controller.GetUser)       //获取用户详情
+			api.PUT("/:id", controller.UpdateUser)    //修改用户
+			api.DELETE("/:id", controller.DeleteUser) //删除用户
+
+			relatedPartyController := controller.NewRelatedPartyController()
+			api.GET("/list", relatedPartyController.GetRelatedPartyList)  //获取列表
+			api.GET("/:id", relatedPartyController.GetRelatedParty)       //获取详情
+			api.PUT("/:id", relatedPartyController.UpdateRelatedParty)    //修改详情
+			api.POST("", relatedPartyController.CreateRelatedParty)       //添加相关方详情
+			api.DELETE("/:id", relatedPartyController.DeleteRelatedParty) //删除详情
 		}
+
 	}
 
 	//引擎处理完成后，返回
