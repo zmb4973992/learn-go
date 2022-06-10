@@ -3,6 +3,7 @@ package main
 import (
 	"learn-go/router"
 	"learn-go/util"
+	"learn-go/util/casbin"
 	"learn-go/util/logger"
 	"learn-go/util/snowflake"
 )
@@ -19,7 +20,8 @@ func main() {
 	if err != nil {
 		panic("生成snowflake实例失败，请重试")
 	}
-
+	//初始化casbin，用于权限控制
+	casbin.Init()
 	//开始采用自定义的方式生成引擎
 	engine := router.InitRouter()
 	err = engine.Run(":" + util.GeneralConfig.HttpPort)

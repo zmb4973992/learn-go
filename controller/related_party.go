@@ -10,7 +10,20 @@ import (
 	"strconv"
 )
 
-func GetRelatedPartyList(c *gin.Context) {
+type IRelatedPartyController interface {
+	GetRelatedPartyList(c *gin.Context)
+	GetRelatedParty(c *gin.Context)
+	UpdateRelatedParty(c *gin.Context)
+	CreateRelatedParty(c *gin.Context)
+}
+
+type relatedPartyController struct{}
+
+func (r relatedPartyController) NewRelatedPartyController() IRelatedPartyController {
+	return relatedPartyController{}
+}
+
+func (relatedPartyController) GetRelatedPartyList(c *gin.Context) {
 	var s service.RelatedPartyService
 	c.ShouldBind(&s)
 	//var response serializer.ResponseForList
@@ -18,14 +31,14 @@ func GetRelatedPartyList(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func GetRelatedParty(c *gin.Context) {
+func (relatedPartyController) GetRelatedParty(c *gin.Context) {
 	relatedPartyID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	res, _ := service.GetDetailOfRelatedParty(relatedPartyID)
 	c.JSON(http.StatusOK, res)
 
 }
 
-func UpdateRelatedParty(c *gin.Context) {
+func (relatedPartyController) UpdateRelatedParty(c *gin.Context) {
 	var paramIn service.RelatedPartyService
 	err := c.ShouldBind(&paramIn)
 	if err != nil {
@@ -41,7 +54,7 @@ func UpdateRelatedParty(c *gin.Context) {
 	c.JSON(200, res)
 }
 
-func CreateRelatedParty(c *gin.Context) {
+func (relatedPartyController) CreateRelatedParty(c *gin.Context) {
 	var s service.RelatedPartyService
 	err := c.ShouldBind(&s)
 	if err != nil {
@@ -58,6 +71,10 @@ func CreateRelatedParty(c *gin.Context) {
 	}
 	res := service.CreateRelatedParty(s)
 	c.JSON(http.StatusOK, res)
+}
+
+func newd() {
+
 }
 
 //多文件上传
