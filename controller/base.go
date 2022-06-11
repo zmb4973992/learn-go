@@ -9,13 +9,12 @@ import (
 
 type IBaseController interface {
 	Success(c *gin.Context, data any)
-	Failure(c *gin.Context, err status.CustomError)
+	Failure(c *gin.Context, errCode int)
 }
 
-type baseController struct {
-}
+type baseController struct{}
 
-func (b baseController) Success(c *gin.Context, data any) {
+func (baseController) Success(c *gin.Context, data any) {
 	c.JSON(http.StatusOK, serializer.ResponseForDetail{
 		Data:    data,
 		Code:    status.Success,
@@ -23,14 +22,7 @@ func (b baseController) Success(c *gin.Context, data any) {
 	})
 }
 
-func (b baseController) Failure(c *gin.Context, err status.CustomError) {
-	c.JSON(http.StatusBadRequest, serializer.ResponseForDetail{
-		Data:    nil,
-		Code:    err.ErrorCode,
-		Message: err.ErrorMessage,
-	})
-}
-
-func NewBaseController() IBaseController {
-	return baseController{}
+func (baseController) Failure(c *gin.Context, errCode int) {
+	response := serializer.NewErrorResponse(errCode)
+	c.JSON(http.StatusBadRequest, response)
 }

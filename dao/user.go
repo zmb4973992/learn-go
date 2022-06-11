@@ -1,19 +1,15 @@
 package dao
 
-//func CreateUser(user *model.User) (code uint64) {
-//	code = UserExistOrNot(user.Username)
-//	if code == util.Success {
-//		err := util.DB.Create(&user).Error
-//		if err != nil {
-//			return util.Error
-//		} else {
-//			return util.Success
-//		}
-//	} else {
-//		return util.Error
-//	}
-//}
-//
+import "learn-go/model"
+
+type user struct {
+}
+
+func Create(user *model.User) error {
+	err := DB.Create(&user).Error
+	return err
+}
+
 //func UserExistOrNot(username string) (code uint64) {
 //	var user model.User
 //	util.DB.Where("username = ?", username).First(&user)

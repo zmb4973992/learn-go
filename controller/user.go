@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"learn-go/serializer"
 	"learn-go/service"
@@ -9,11 +10,27 @@ import (
 	"strconv"
 )
 
-// CreateUser 测试
-func CreateUser(c *gin.Context) {
+type IUserController interface {
+	CreateUser(c *gin.Context)
+	GetUser(c *gin.Context)
+	UpdateUser(c *gin.Context)
+	DeleteUser(c *gin.Context)
+	GetUserList(c *gin.Context)
+}
+
+type userController struct {
+	baseController
+}
+
+func NewUserController() IUserController {
+	return userController{}
+}
+
+func (userController) CreateUser(c *gin.Context) {
 	var record service.UserService
 	err := c.ShouldBind(&record)
 	if err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
 			Data:    nil,
 			Code:    status.ErrorInvalidFormDataParameters,
@@ -21,12 +38,12 @@ func CreateUser(c *gin.Context) {
 		})
 		return
 	}
-	res := service.CreateUser(record)
+	res := record.Create(record)
 	c.JSON(http.StatusOK, res)
 	return
 }
 
-func GetUser(c *gin.Context) {
+func (userController) GetUser(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
@@ -41,8 +58,8 @@ func GetUser(c *gin.Context) {
 	return
 }
 
-func UpdateUser(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64) //把uri上的id参数传递给结构体形式的入参
+func (userController) UpdateUser(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id")) //把uri上的id参数传递给结构体形式的入参
 	//如果URI的参数不是数字
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
@@ -67,7 +84,7 @@ func UpdateUser(c *gin.Context) {
 	c.JSON(200, res)
 }
 
-func DeleteUser(c *gin.Context) {
+func (userController) DeleteUser(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64) //把uri上的id参数传递给结构体形式的入参
 	//如果URI的参数不是数字
 	if err != nil {
@@ -82,7 +99,7 @@ func DeleteUser(c *gin.Context) {
 	c.JSON(200, res)
 }
 
-func GetUserList(c *gin.Context) {
+func (userController) GetUserList(c *gin.Context) {
 	var paginationRule service.Paging
 	err := c.ShouldBind(&paginationRule) //不需要处理错误，如果绑定不上，下面的方法会自动使用默认值
 	if err != nil {

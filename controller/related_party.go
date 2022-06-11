@@ -10,14 +10,19 @@ import (
 	"strconv"
 )
 
+// IRelatedPartyController 使用简单工厂模式,公开接口、公开创建结构体的方法，隐藏结构体
 type IRelatedPartyController interface {
-	GetRelatedPartyList(c *gin.Context)
 	GetRelatedParty(c *gin.Context)
 	UpdateRelatedParty(c *gin.Context)
 	CreateRelatedParty(c *gin.Context)
+	DeleteRelatedParty(c *gin.Context)
+	GetRelatedPartyList(c *gin.Context)
 }
 
-type relatedPartyController struct{}
+//继承baseController，获取相关的方法
+type relatedPartyController struct {
+	baseController
+}
 
 func NewRelatedPartyController() IRelatedPartyController {
 	return relatedPartyController{}
@@ -101,7 +106,7 @@ func newd() {
 //	return
 //}
 
-func DeleteRelatedParty(c *gin.Context) {
+func (relatedPartyController) DeleteRelatedParty(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{

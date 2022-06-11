@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
+	"learn-go/dao"
 	"learn-go/model"
 	"learn-go/serializer"
 	"learn-go/util"
@@ -12,15 +13,20 @@ import (
 )
 
 type UserService struct {
-	ID       int64   `form:"id" json:"id"`
-	Username *string `form:"username" json:"username" binding:"required"`
-	Password *string `form:"password" json:"-"  binding:"required"`
+	ID       int    `json:"id"`
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
-func (s *UserService) Login() serializer.ResponseForDetail {
+type UserLoginService struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+func (s UserLoginService) Login() serializer.ResponseForDetail {
 	var user model.User
 	//根据入参的用户名，从数据库取出记录赋值给user
-	res := util.DB.Where("username=?", s.Username).First(&user)
+	res := dao.DB.Where("username=?", s).First(&user)
 	//如果没有找到记录
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return serializer.ResponseForDetail{
@@ -29,17 +35,17 @@ func (s *UserService) Login() serializer.ResponseForDetail {
 		}
 	}
 	//如果找到记录了，但是密码错误的话
-	if util.CheckPassword(*s.Password, *user.Password) == false {
+	if util.CheckPassword(s.Password, user.Password) == false {
 		return serializer.ResponseForDetail{
 			Code:    status.ErrorInvalidUsernameOrPassword,
 			Message: status.GetMessage(status.ErrorInvalidUsernameOrPassword),
 		}
 	}
 	//账号密码都正确时，生成token
-	token := jwt.GenerateToken(*user.Username)
+	token := jwt.GenerateToken(user.Username)
 	return serializer.ResponseForDetail{
 		Data: serializer.UserLoginResponse{
-			Username: *user.Username,
+			Username: user.Username,
 			Token:    token,
 		},
 		Code:    status.Success,
@@ -49,7 +55,7 @@ func (s *UserService) Login() serializer.ResponseForDetail {
 
 func GetUser(id int64) serializer.ResponseForDetail {
 	var record *UserService
-	result := util.DB.Debug().Model(&model.User{}).Where("id=?", id).First(&record)
+	result := dao.DB.Debug().Model(&model.User{}).Where("id=?", id).First(&record)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return serializer.ResponseForDetail{
 			Data:    nil,
@@ -64,22 +70,22 @@ func GetUser(id int64) serializer.ResponseForDetail {
 	}
 }
 
-func CreateUser(paramIn UserService) serializer.ResponseForDetail {
-	record := new(model.User)
-	if *paramIn.Username == "" || *paramIn.Password == "" {
+func (UserService) Create(paramIn UserService) serializer.ResponseForDetail {
+	user := new(model.User)
+	if paramIn.Username == "" || paramIn.Password == "" {
 		return serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    status.ErrorInvalidFormDataParameters,
-			Message: status.GetMessage(status.ErrorInvalidFormDataParameters),
+			Code:    status.ErrorInvalidJsonParameters,
+			Message: status.GetMessage(status.ErrorInvalidJsonParameters),
 		}
 	}
-	record.Username = paramIn.Username
-	encryptedPassword, err := util.EncryptPassword(*paramIn.Password)
+	user.Username = paramIn.Username
+	encryptedPassword, err := util.EncryptPassword(paramIn.Password)
 	if err != nil {
 		serializer.NewErrorResponse(status.ErrorFailToEncrypt)
 	}
-	record.Password = &encryptedPassword
-	res := util.DB.Debug().Create(&record)
+	user.Password = encryptedPassword
+	res := dao.DB.Debug().Create(&user)
 	if res.Error != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
@@ -89,8 +95,8 @@ func CreateUser(paramIn UserService) serializer.ResponseForDetail {
 	}
 	return serializer.ResponseForDetail{
 		Data: UserService{
-			ID:       record.ID,
-			Username: record.Username,
+			ID:       user.ID,
+			Username: user.Username,
 		},
 		Code:    status.Success,
 		Message: status.GetMessage(status.Success),
@@ -99,7 +105,7 @@ func CreateUser(paramIn UserService) serializer.ResponseForDetail {
 
 func UpdateUser(paramIn UserService) serializer.ResponseForDetail {
 	record := &model.User{}
-	res := util.DB.Debug().Model(&model.User{}).Where("id=?", paramIn.ID).First(&record)
+	res := dao.DB.Debug().Model(&model.User{}).Where("id=?", paramIn.ID).First(&record)
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return serializer.ResponseForDetail{
 			Data:    nil,
@@ -109,7 +115,7 @@ func UpdateUser(paramIn UserService) serializer.ResponseForDetail {
 	}
 	record.Username = paramIn.Username
 	record.Password = paramIn.Password
-	res = util.DB.Debug().Save(&record)
+	res = dao.DB.Debug().Save(&record)
 	if res.Error != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
@@ -125,7 +131,7 @@ func UpdateUser(paramIn UserService) serializer.ResponseForDetail {
 }
 
 func DeleteUser(id int64) serializer.ResponseForDetail {
-	result := util.DB.Debug().Delete(&model.User{}, id)
+	result := dao.DB.Debug().Delete(&model.User{}, id)
 	if result.Error != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
@@ -149,7 +155,7 @@ func GetUserList(paginationRule Paging) serializer.ResponseForDetail {
 	if paginationRule.PageSize <= 0 || paginationRule.PageSize > 100 {
 		paginationRule.PageSize = 20
 	}
-	util.DB.Debug().Scopes(PaginateBy(paginationRule)).Model(&model.User{}).Find(&list)
+	dao.DB.Debug().Scopes(PaginateBy(paginationRule)).Model(&model.User{}).Find(&list)
 	return serializer.ResponseForDetail{
 		Data:    list,
 		Code:    status.Success,

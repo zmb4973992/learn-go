@@ -1,8 +1,9 @@
 package main
 
 import (
+	"learn-go/config"
+	"learn-go/dao"
 	"learn-go/router"
-	"learn-go/util"
 	"learn-go/util/casbin"
 	"learn-go/util/logger"
 	"learn-go/util/snowflake"
@@ -10,21 +11,18 @@ import (
 
 func main() {
 	//加载配置
-	util.LoadConfig()
+	config.Init()
 	//加载日志记录器，使用的是zap
-	logger.InitLogger()
+	logger.Init()
 	//连接数据库
-	util.ConnectDB()
+	dao.Init()
 	//初始化snowflake，用来生成唯一ID
-	err := snowflake.InitSnowFlake()
-	if err != nil {
-		panic("生成snowflake实例失败，请重试")
-	}
+	snowflake.Init()
 	//初始化casbin，用于权限控制
 	casbin.Init()
 	//开始采用自定义的方式生成引擎
-	engine := router.InitRouter()
-	err = engine.Run(":" + util.GeneralConfig.HttpPort)
+	engine := router.Init()
+	err := engine.Run(":" + config.GlobalConfig.HttpPort)
 	if err != nil {
 		panic(err)
 	}

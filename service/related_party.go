@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
+	"learn-go/dao"
 	"learn-go/model"
 	"learn-go/serializer"
-	"learn-go/util"
 	"learn-go/util/status"
 	"time"
 )
@@ -34,12 +34,12 @@ func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
 		s.Paging.PageSize = 20
 	}
 	var list []RelatedPartyService
-	res := util.DB.Debug().Scopes(PaginateBy(s.Paging)).
+	res := dao.DB.Debug().Scopes(PaginateBy(s.Paging)).
 		Model(&model.RelatedParty{}).
 		Where("chinese_name=?", s.ChineseName).
 		Find(&list)
 	var temp int64
-	util.DB.Debug().
+	dao.DB.Debug().
 		Model(&model.RelatedParty{}).
 		Where("chinese_name=?", s.ChineseName).Count(&temp)
 	if res.Error != nil {
@@ -74,7 +74,7 @@ func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
 
 func GetDetailOfRelatedParty(id int64) (*serializer.ResponseForDetail, error) {
 	var record *model.RelatedParty
-	result := util.DB.Debug().Where("id=?", id).First(&record)
+	result := dao.DB.Debug().Where("id=?", id).First(&record)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return &serializer.ResponseForDetail{
 			Data:    nil,
@@ -91,7 +91,7 @@ func GetDetailOfRelatedParty(id int64) (*serializer.ResponseForDetail, error) {
 
 func UpdateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetail {
 	var record model.RelatedParty
-	result := util.DB.Debug().First(&record, paramIn.ID)
+	result := dao.DB.Debug().First(&record, paramIn.ID)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return serializer.ResponseForDetail{
 			Data:    nil,
@@ -104,7 +104,7 @@ func UpdateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetai
 	record.Address = paramIn.Address
 	record.UniformSocialCreditCode = paramIn.UniformSocialCreditCode
 	record.Telephone = paramIn.Telephone
-	result = util.DB.Debug().Save(&record)
+	result = dao.DB.Debug().Save(&record)
 	if result.Error != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
@@ -142,7 +142,7 @@ func CreateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetai
 	if paramIn.Files != nil && *paramIn.Files != "" {
 		record.Files = paramIn.Files
 	}
-	result := util.DB.Debug().Create(&record)
+	result := dao.DB.Debug().Create(&record)
 	if result.Error != nil {
 		return serializer.NewResponseForCreationResult(status.ErrorFailToSaveRecord, record.ID)
 	}
@@ -150,7 +150,7 @@ func CreateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetai
 }
 
 func DeleteRelatedParty(id int64) serializer.ResponseForDetail {
-	result := util.DB.Debug().Delete(&model.RelatedParty{}, id)
+	result := dao.DB.Debug().Delete(&model.RelatedParty{}, id)
 	if result.Error != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,

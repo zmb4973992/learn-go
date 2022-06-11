@@ -38,10 +38,10 @@ func NewResponseForCreationResult(statusCode int, ID int) ResponseForDetail {
 }
 
 // NewErrorResponse 创建记录后，自动生成返回结果
-func NewErrorResponse(statusCode int) ResponseForDetail {
+func NewErrorResponse(errCode int) ResponseForDetail {
 	return ResponseForDetail{
 		Data:    nil,
-		Code:    statusCode,
-		Message: status.GetMessage(statusCode),
+		Code:    errCode,
+		Message: status.GetMessage(errCode),
 	}
 }

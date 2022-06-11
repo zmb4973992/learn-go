@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"github.com/golang-jwt/jwt"
-	"learn-go/util"
+	"learn-go/config"
 	"time"
 )
 
@@ -12,15 +12,16 @@ type myClaim struct {
 }
 
 // GenerateToken 传入Username，返回token字符串
-func GenerateToken(Username string) string {
+func GenerateToken(username string) string {
+	days := time.Duration(config.GlobalConfig.ValidityPeriod)
 	claim := myClaim{
-		Username,
+		username,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 24 * 7).Unix(), //默认7天的有效期
+			ExpiresAt: time.Now().Add(time.Hour * 24 * days).Unix(),
 		}}
 	tokenStruct := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	//fmt.Println(util.JWTConfig.SecretKey)  //用于测试密钥是否正常
-	tokenString, _ := tokenStruct.SignedString(util.JWTConfig.SecretKey)
+	tokenString, _ := tokenStruct.SignedString(config.GlobalConfig.SecretKey)
 	return tokenString
 }
 
@@ -28,7 +29,7 @@ func GenerateToken(Username string) string {
 //第一个参数是token字符串，第二个参数是结构体，第三个参数是jwt规定的解析函数，包含密钥
 func ParseToken(token string) (*myClaim, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &myClaim{}, func(token *jwt.Token) (interface{}, error) {
-		return util.JWTConfig.SecretKey, nil
+		return config.GlobalConfig.SecretKey, nil
 	})
 	if tokenClaims != nil {
 		if claims, ok := tokenClaims.Claims.(*myClaim); ok && tokenClaims.Valid {

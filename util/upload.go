@@ -3,6 +3,7 @@ package util
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"learn-go/config"
 	"strings"
 )
 
@@ -15,7 +16,7 @@ func UploadSingleFile(c *gin.Context, key string) (uniqueFileName *string, err e
 	}
 	id := uuid.New().String()
 	file.Filename = id + "--" + file.Filename
-	err = c.SaveUploadedFile(file, UploadConfig.FullPath+file.Filename)
+	err = c.SaveUploadedFile(file, config.GlobalConfig.FullPath+file.Filename)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +35,7 @@ func UploadMultipleFiles(c *gin.Context, key string) (uniqueFileNames *string, e
 	for _, file := range files {
 		id := uuid.New().String()
 		file.Filename = id + "--" + file.Filename
-		err = c.SaveUploadedFile(file, UploadConfig.FullPath+file.Filename)
+		err = c.SaveUploadedFile(file, config.GlobalConfig.FullPath+file.Filename)
 		if err != nil {
 			return nil, err
 		}

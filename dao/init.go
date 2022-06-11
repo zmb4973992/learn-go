@@ -1,8 +1,9 @@
-package util
+package dao
 
 import (
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
+	"learn-go/config"
 	"learn-go/model"
 	"time"
 )
@@ -12,9 +13,9 @@ var (
 	err error
 )
 
-func ConnectDB() {
+func Init() {
 	//通过gorm连接sqlserver数据库
-	DB, err = gorm.Open(sqlserver.Open(DBConfig.Dsn), &gorm.Config{})
+	DB, err = gorm.Open(sqlserver.Open(config.GlobalConfig.DSN), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

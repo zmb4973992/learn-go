@@ -1,25 +1,5 @@
 package status
 
-// CustomError 自定义错误类型的结构体
-type CustomError struct {
-	ErrorCode    int
-	ErrorMessage string
-}
-
-//需要实现的方法
-func (e CustomError) Error() string {
-	return e.ErrorMessage //这里的message已经存在，就不用再做校验了
-}
-
-// NewCustomError 自定义错误的构造器
-func NewCustomError(errorCode int) CustomError {
-	instance := CustomError{
-		ErrorCode:    errorCode,
-		ErrorMessage: GetMessage(errorCode),
-	}
-	return instance
-}
-
 //自定义错误的code
 const (
 	Success int = 0
@@ -33,17 +13,20 @@ const (
 	ErrorInvalidURIParameters int = 1003
 	// ErrorInvalidFormDataParameters form-data参数无效
 	ErrorInvalidFormDataParameters int = 1004
+	// ErrorInvalidJsonParameters json参数无效
+	ErrorInvalidJsonParameters int = 1005
 	// ErrorFailToSaveRecord 保存记录失败
-	ErrorFailToSaveRecord int = 1005
+	ErrorFailToSaveRecord int = 1006
 	// ErrorFailToDeleteRecord 删除记录失败
-	ErrorFailToDeleteRecord int = 1006
-	ErrorFileTooLarge       int = 1007
+	ErrorFailToDeleteRecord int = 1007
+	ErrorFileTooLarge       int = 1008
 
 	ErrorInvalidUsernameOrPassword int = 2001
 	ErrorUsernameExist             int = 2002
 	ErrorPasswordIncorrect         int = 2003
 
-	ErrorTokenInvalid int = 3001
+	ErrorAccessTokenInvalid  int = 3001
+	ErrorAccessTokenNotFound int = 3002
 
 	ErrorFailToEncrypt int = 4001
 )
@@ -57,6 +40,7 @@ var Message = map[int]string{
 	ErrorNotEnoughParameters:       "没有足够的参数",
 	ErrorInvalidURIParameters:      "URI参数无效",
 	ErrorInvalidFormDataParameters: "form-data参数无效",
+	ErrorInvalidJsonParameters:     "json参数无效",
 	ErrorFailToSaveRecord:          "保存记录失败",
 	ErrorFailToDeleteRecord:        "删除记录失败",
 	ErrorFileTooLarge:              "文件过大",
@@ -65,7 +49,8 @@ var Message = map[int]string{
 	ErrorUsernameExist:             "用户名已存在",
 	ErrorPasswordIncorrect:         "密码错误",
 
-	ErrorTokenInvalid: "token无效",
+	ErrorAccessTokenInvalid:  "access_token无效",
+	ErrorAccessTokenNotFound: "缺少access_token",
 
 	ErrorFailToEncrypt: "加密失败",
 }

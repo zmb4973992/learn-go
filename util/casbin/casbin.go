@@ -1,16 +1,16 @@
 package casbin
 
 import (
-	"fmt"
 	"github.com/casbin/casbin/v2"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
-	"learn-go/util"
+	"learn-go/dao"
 )
 
 func Init() {
-	a, _ := gormadapter.NewAdapterByDB(util.DB)
-	e, _ := casbin.NewEnforcer("./config/rbac_model.conf", a)
-	e.LoadPolicy()
-	res, _ := e.Enforce("a", "b", "c")
-	fmt.Println(res)
+	adapter, _ := gormadapter.NewAdapterByDB(dao.DB)
+	enforcer, _ := casbin.NewEnforcer("./config/casbin_model.conf", adapter)
+	err := enforcer.LoadPolicy()
+	if err != nil {
+		panic("casbin加载策略失败，请重试")
+	}
 }
