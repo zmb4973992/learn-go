@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"learn-go/dto"
 	"learn-go/serializer"
 	"learn-go/service"
 	"learn-go/util/status"
@@ -11,11 +11,11 @@ import (
 )
 
 type IUserController interface {
-	CreateUser(c *gin.Context)
-	GetUser(c *gin.Context)
-	UpdateUser(c *gin.Context)
-	DeleteUser(c *gin.Context)
-	GetUserList(c *gin.Context)
+	Create(c *gin.Context)
+	Get(c *gin.Context)
+	Update(c *gin.Context)
+	Delete(c *gin.Context)
+	List(c *gin.Context)
 }
 
 type userController struct {
@@ -26,41 +26,48 @@ func NewUserController() IUserController {
 	return userController{}
 }
 
-func (userController) CreateUser(c *gin.Context) {
-	var record service.UserService
-	err := c.ShouldBind(&record)
+func (userController) Get(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    status.ErrorInvalidFormDataParameters,
-			Message: status.GetMessage(status.ErrorInvalidFormDataParameters),
+			Code:    status.ErrorInvalidURIParameters,
+			Message: status.GetMessage(status.ErrorInvalidURIParameters),
 		})
 		return
 	}
-	res := record.Create(record)
+	s := service.NewUserService()
+	res := s.Get(id)
 	c.JSON(http.StatusOK, res)
 	return
 }
 
-func (userController) GetUser(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+func (userController) Create(c *gin.Context) {
+	//先声明空的dto，再把context里的数据绑到dto上
+	var u dto.UserDTO
+	err := c.ShouldBindJSON(&u)
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    status.ErrorInvalidURIParameters,
-			Message: status.GetMessage(status.ErrorInvalidURIParameters),
+			Code:    status.ErrorInvalidJsonParameters,
+			Message: status.GetMessage(status.ErrorInvalidJsonParameters),
 		})
 		return
 	}
-	res := service.GetUser(id)
+	s := service.NewUserService()
+	res := s.Create(&u)
 	c.JSON(http.StatusOK, res)
 	return
 }
 
-func (userController) UpdateUser(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id")) //把uri上的id参数传递给结构体形式的入参
-	//如果URI的参数不是数字
+// Update controller的功能：解析uri参数、json参数，拦截非法参数，然后传给service层处理
+func (userController) Update(c *gin.Context) {
+	//这里只更新传过来的参数，所以采用map形式
+	paramIn := make(map[string]any)
+	_ = c.ShouldBindJSON(&paramIn)
+	//把uri上的id参数传递给结构体形式的入参
+	id, err := strconv.Atoi(c.Param("id"))
+	//如果解析失败，例如URI的参数不是数字
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
 			Data:    nil,
@@ -69,24 +76,16 @@ func (userController) UpdateUser(c *gin.Context) {
 		})
 		return
 	}
-	var paramIn service.UserService
-	paramIn.ID = id
-	err = c.ShouldBind(&paramIn)
-	if err != nil {
-		c.JSON(http.StatusOK, serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.ErrorInvalidFormDataParameters,
-			Message: status.GetMessage(status.ErrorInvalidFormDataParameters),
-		})
-		return
-	}
-	res := service.UpdateUser(paramIn)
+	s := new(service.UserService)
+	//参数解析完毕，交给service层处理
+	res := s.Update(id, paramIn)
 	c.JSON(200, res)
 }
 
-func (userController) DeleteUser(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64) //把uri上的id参数传递给结构体形式的入参
-	//如果URI的参数不是数字
+func (userController) Delete(c *gin.Context) {
+	//把uri上的id参数传递给结构体形式的入参
+	id, err := strconv.Atoi(c.Param("id"))
+	//如果解析失败，例如URI的参数不是数字
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
 			Data:    nil,
@@ -95,16 +94,24 @@ func (userController) DeleteUser(c *gin.Context) {
 		})
 		return
 	}
-	res := service.DeleteUser(id)
-	c.JSON(200, res)
+	s := new(service.UserService)
+	response := s.Delete(id)
+	c.JSON(200, response)
 }
 
-func (userController) GetUserList(c *gin.Context) {
-	var paginationRule service.Paging
-	err := c.ShouldBind(&paginationRule) //不需要处理错误，如果绑定不上，下面的方法会自动使用默认值
+func (userController) List(c *gin.Context) {
+	//这里只处理传过来的参数，所以采用map形式,打包传给service层进行处理
+	paramIn := make(map[string]any)
+	err := c.ShouldBindJSON(&paramIn) //不需要处理错误，如果绑定不上，下面的方法会自动使用默认值
 	if err != nil {
+		c.JSON(http.StatusOK, serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorInvalidJsonParameters,
+			Message: status.GetMessage(status.ErrorInvalidJsonParameters),
+		})
+		return
 	}
-	var response serializer.ResponseForDetail
-	response = service.GetUserList(paginationRule)
+	s := new(service.UserService)
+	response := s.List(paramIn)
 	c.JSON(http.StatusOK, response)
 }

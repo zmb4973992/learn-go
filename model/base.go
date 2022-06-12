@@ -2,8 +2,8 @@ package model
 
 import "time"
 
-type BaseModel struct {
-	ID        int
-	CreatedAt time.Time
-	UpdatedAt time.Time
+type baseModel struct {
+	ID        int        `json:"id" gorm`
+	CreatedAt *time.Time `json:"-"`
+	UpdatedAt *time.Time `json:"-"`
 }

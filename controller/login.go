@@ -13,9 +13,9 @@ func Login(c *gin.Context) {
 	err := c.ShouldBind(&s)
 	if err != nil {
 		res := serializer.ResponseForDetail{
-			Code:    status.ErrorInvalidFormDataParameters,
+			Code:    status.ErrorInvalidJsonParameters,
 			Data:    nil,
-			Message: status.GetMessage(status.ErrorInvalidFormDataParameters),
+			Message: status.GetMessage(status.ErrorInvalidJsonParameters),
 		}
 		c.JSON(status.Error, res)
 		return

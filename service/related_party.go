@@ -7,23 +7,24 @@ import (
 	"learn-go/dao"
 	"learn-go/model"
 	"learn-go/serializer"
+	"learn-go/util"
 	"learn-go/util/status"
 	"time"
 )
 
 type RelatedPartyService struct {
 	ID                      int
-	ChineseName             *string    `form:"chinese_name"`
-	EnglishName             *string    `form:"english_name" `
-	SupplierCode            *string    `form:"supplier_code" `
-	Address                 *string    `form:"address" `
-	UniformSocialCreditCode *string    `form:"uniform_social_credit_code" ` //统一社会信用代码
-	Telephone               *string    `form:"telephone" `
-	File                    *string    `form:"-"`
-	Files                   *string    `form:"-"`
-	CreatedAt               *time.Time `form:"created_at"`
-	UpdatedAt               *time.Time `form:"updated_at"`
-	Paging                  Paging     `json:"-"`
+	ChineseName             *string     `form:"chinese_name"`
+	EnglishName             *string     `form:"english_name" `
+	SupplierCode            *string     `form:"supplier_code" `
+	Address                 *string     `form:"address" `
+	UniformSocialCreditCode *string     `form:"uniform_social_credit_code" ` //统一社会信用代码
+	Telephone               *string     `form:"telephone" `
+	File                    *string     `form:"-"`
+	Files                   *string     `form:"-"`
+	CreatedAt               *time.Time  `form:"created_at"`
+	UpdatedAt               *time.Time  `form:"updated_at"`
+	Paging                  util.Paging `json:"-"`
 }
 
 func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
@@ -34,7 +35,7 @@ func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
 		s.Paging.PageSize = 20
 	}
 	var list []RelatedPartyService
-	res := dao.DB.Debug().Scopes(PaginateBy(s.Paging)).
+	res := dao.DB.Debug().Scopes(util.PaginateBy(s.Paging)).
 		Model(&model.RelatedParty{}).
 		Where("chinese_name=?", s.ChineseName).
 		Find(&list)
@@ -61,12 +62,8 @@ func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
 	fmt.Println(res.RowsAffected)
 	fmt.Println(temp)
 	return serializer.ResponseForList{
-		Data: list,
-		Paging: serializer.ResponseForPaging{
-			CurrentPage: s.Paging.Page,
-			PageSize:    s.Paging.PageSize,
-			TotalPage:   GetTotalPage(int(temp), s.Paging.PageSize),
-		},
+		Data:    list,
+		Paging:  nil,
 		Code:    status.Success,
 		Message: status.GetMessage(status.Success),
 	}

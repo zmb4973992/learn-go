@@ -2,13 +2,11 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"gorm.io/gorm"
 	"learn-go/dao"
-	"learn-go/model"
+	"learn-go/dto"
 	"learn-go/serializer"
 	"learn-go/util"
-	"learn-go/util/jwt"
 	"learn-go/util/status"
 )
 
@@ -18,45 +16,14 @@ type UserService struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type UserLoginService struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
+func NewUserService() UserService {
+	return UserService{}
 }
 
-func (s UserLoginService) Login() serializer.ResponseForDetail {
-	var user model.User
-	//根据入参的用户名，从数据库取出记录赋值给user
-	res := dao.DB.Where("username=?", s).First(&user)
-	//如果没有找到记录
-	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-		return serializer.ResponseForDetail{
-			Code:    status.ErrorInvalidUsernameOrPassword,
-			Message: status.GetMessage(status.ErrorInvalidUsernameOrPassword),
-		}
-	}
-	//如果找到记录了，但是密码错误的话
-	if util.CheckPassword(s.Password, user.Password) == false {
-		return serializer.ResponseForDetail{
-			Code:    status.ErrorInvalidUsernameOrPassword,
-			Message: status.GetMessage(status.ErrorInvalidUsernameOrPassword),
-		}
-	}
-	//账号密码都正确时，生成token
-	token := jwt.GenerateToken(user.Username)
-	return serializer.ResponseForDetail{
-		Data: serializer.UserLoginResponse{
-			Username: user.Username,
-			Token:    token,
-		},
-		Code:    status.Success,
-		Message: status.GetMessage(status.Success),
-	}
-}
-
-func GetUser(id int64) serializer.ResponseForDetail {
-	var record *UserService
-	result := dao.DB.Debug().Model(&model.User{}).Where("id=?", id).First(&record)
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+func (UserService) Get(id int) any {
+	u := new(dao.UserDAO)
+	data := u.Get(id)
+	if data == nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
 			Code:    status.ErrorRecordNotFound,
@@ -64,63 +31,26 @@ func GetUser(id int64) serializer.ResponseForDetail {
 		}
 	}
 	return serializer.ResponseForDetail{
-		Data:    record,
+		Data:    data,
 		Code:    status.Success,
 		Message: status.GetMessage(status.Success),
 	}
 }
 
-func (UserService) Create(paramIn UserService) serializer.ResponseForDetail {
-	user := new(model.User)
-	if paramIn.Username == "" || paramIn.Password == "" {
-		return serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.ErrorInvalidJsonParameters,
-			Message: status.GetMessage(status.ErrorInvalidJsonParameters),
-		}
-	}
-	user.Username = paramIn.Username
+func (UserService) Create(paramIn *dto.UserDTO) serializer.ResponseForDetail {
 	encryptedPassword, err := util.EncryptPassword(paramIn.Password)
 	if err != nil {
-		serializer.NewErrorResponse(status.ErrorFailToEncrypt)
+		return serializer.NewErrorResponse(status.ErrorFailToEncrypt)
 	}
-	user.Password = encryptedPassword
-	res := dao.DB.Debug().Create(&user)
-	if res.Error != nil {
+	paramIn.Password = encryptedPassword
+
+	var userDAO dao.UserDAO
+	err = userDAO.Create(paramIn)
+	if err != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
 			Code:    status.Error,
 			Message: status.GetMessage(status.Error),
-		}
-	}
-	return serializer.ResponseForDetail{
-		Data: UserService{
-			ID:       user.ID,
-			Username: user.Username,
-		},
-		Code:    status.Success,
-		Message: status.GetMessage(status.Success),
-	}
-}
-
-func UpdateUser(paramIn UserService) serializer.ResponseForDetail {
-	record := &model.User{}
-	res := dao.DB.Debug().Model(&model.User{}).Where("id=?", paramIn.ID).First(&record)
-	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-		return serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.ErrorRecordNotFound,
-			Message: status.GetMessage(status.ErrorRecordNotFound),
-		}
-	}
-	record.Username = paramIn.Username
-	record.Password = paramIn.Password
-	res = dao.DB.Debug().Save(&record)
-	if res.Error != nil {
-		return serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.ErrorFailToSaveRecord,
-			Message: status.GetMessage(status.ErrorFailToSaveRecord),
 		}
 	}
 	return serializer.ResponseForDetail{
@@ -130,9 +60,40 @@ func UpdateUser(paramIn UserService) serializer.ResponseForDetail {
 	}
 }
 
-func DeleteUser(id int64) serializer.ResponseForDetail {
-	result := dao.DB.Debug().Delete(&model.User{}, id)
-	if result.Error != nil {
+func (UserService) Update(id int, paramIn map[string]any) serializer.ResponseForDetail {
+	//新建一个dao.User结构体的实例
+	u := new(dao.UserDAO)
+	//然后使用它的方法
+	err := u.Update(id, paramIn)
+	//如果返回的错误是“没找到指定记录”：
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorRecordNotFound,
+			Message: status.GetMessage(status.ErrorRecordNotFound),
+		}
+	}
+	//如果是其他错误：
+	if err != nil {
+		return serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorFailToSaveRecord,
+			Message: status.GetMessage(status.ErrorFailToSaveRecord),
+		}
+	}
+	//更新正常、没有错误的话：
+	return serializer.ResponseForDetail{
+		Data:    nil,
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
+	}
+}
+
+func (UserService) Delete(id int) serializer.ResponseForDetail {
+	//新建一个dao.User结构体的实例
+	u := new(dao.UserDAO)
+	err := u.Delete(id)
+	if err != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
 			Code:    status.ErrorFailToDeleteRecord,
@@ -146,16 +107,22 @@ func DeleteUser(id int64) serializer.ResponseForDetail {
 	}
 }
 
-func GetUserList(paginationRule Paging) serializer.ResponseForDetail {
-	var list []UserService
-	fmt.Println(list)
-	if paginationRule.Page <= 0 {
-		paginationRule.Page = 1
+func (UserService) List(paramIn map[string]any) serializer.ResponseForDetail {
+	//默认生成的sqlCondition中，page=1，pageSize=20
+	sqlCondition := util.NewSqlCondition()
+	//如果参数里的page是整数且大于0：
+	page, ok := paramIn["page"].(int)
+	if ok && page > 0 {
+		sqlCondition.PagingRule.Page = page
 	}
-	if paginationRule.PageSize <= 0 || paginationRule.PageSize > 100 {
-		paginationRule.PageSize = 20
+	//如果参数里的pageSize是整数且大于0：
+	pageSize, ok := paramIn["page_size"].(int)
+	if ok && pageSize > 0 {
+		sqlCondition.PagingRule.PageSize = pageSize
 	}
-	dao.DB.Debug().Scopes(PaginateBy(paginationRule)).Model(&model.User{}).Find(&list)
+	//新建一个dao.User结构体的实例
+	u := new(dao.UserDAO)
+	list, _ := u.List(*sqlCondition)
 	return serializer.ResponseForDetail{
 		Data:    list,
 		Code:    status.Success,

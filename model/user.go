@@ -3,14 +3,24 @@ package model
 import "time"
 
 type User struct {
-	ID        int    `form:"id" json:"id"`
-	Username  string `form:"username" json:"username" `
-	Password  string `form:"password"`
-	CreatedAt *time.Time
-	UpdatedAt *time.Time
+	ID        int       `json:"id"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
+	Username  string
+	Password  string
 }
 
 // TableName 将表名改为user
 func (User) TableName() string {
 	return "user"
 }
+
+//func UserExistOrNot(username string) (code uint64) {
+//	var user model.User
+//	util.DB.Where("username = ?", username).First(&user)
+//	if user.ID > 0 {
+//		return util.Error_Username_Exist
+//	} else {
+//		return user.ID
+//	}
+//}

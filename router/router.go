@@ -20,14 +20,14 @@ func Init() *gin.Engine {
 	userController := controller.NewUserController()
 	relatedPartyController := controller.NewRelatedPartyController()
 
-	engine.POST("/api/user", userController.CreateUser) //添加用户
+	engine.POST("/api/user", userController.Create) //添加用户
 	//依次加载所有的路由组，以下都需要经过jwt验证
 	api := engine.Group("/api").Use(middleware.JWT())
 	{
-		api.GET("/user/:id", userController.GetUser)       //获取用户详情
-		api.PUT("/user/:id", userController.UpdateUser)    //修改用户
-		api.DELETE("/user/:id", userController.DeleteUser) //删除用户
-		api.GET("/user/list", userController.GetUserList)  //获取用户列表
+		api.GET("/user/:id", userController.Get)       //获取用户详情
+		api.PUT("/user/:id", userController.Update)    //修改用户
+		api.DELETE("/user/:id", userController.Delete) //删除用户
+		api.GET("/user/list", userController.List)     //获取用户列表
 
 		api.GET("/related_party/list", relatedPartyController.GetRelatedPartyList) //获取列表
 		api.GET("/related_party/:id", relatedPartyController.GetRelatedParty)      //获取详情

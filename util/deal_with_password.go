@@ -3,7 +3,8 @@ package util
 import "golang.org/x/crypto/bcrypt"
 
 func EncryptPassword(originalPassword string) (encryptedPassword string, err error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(originalPassword), 10) //10为加密难度，取值范围为4-31，官方建议10
+	//10为加密难度，取值范围为4-31，官方建议10
+	bytes, err := bcrypt.GenerateFromPassword([]byte(originalPassword), 10)
 	if err != nil {
 		return "", err
 	}
@@ -13,5 +14,6 @@ func EncryptPassword(originalPassword string) (encryptedPassword string, err err
 
 func CheckPassword(originalPassword string, encryptedPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(encryptedPassword), []byte(originalPassword))
-	return err == nil //等于如果err有值，那么err==nil为false，返回false；如果err为空，err==nil为true，返回true
+	//等于如果err有值，那么err==nil为false，返回false；如果err为空，err==nil为true，返回true
+	return err == nil
 }
