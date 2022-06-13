@@ -113,6 +113,7 @@ func (UserService) List(paramIn map[string]any) serializer.ResponseForDetail {
 	//对paramIn进行清洗
 	//这部分是用于where的参数
 	//如果类型为any，那么go会把数字识别为float64，需要在这里进行转化
+
 	page, ok := paramIn["page"].(float64)
 	if ok && page > 0 {
 		sqlCondition.Paging.Page = int(page)
@@ -122,16 +123,23 @@ func (UserService) List(paramIn map[string]any) serializer.ResponseForDetail {
 	if ok && pageSize > 0 && pageSize <= 100 {
 		sqlCondition.Paging.PageSize = int(pageSize)
 	}
-	if paramIn["username"] != "" {
-		sqlCondition = sqlCondition.Where("username = ?", paramIn["username"])
+	username, ok := paramIn["username"].(string)
+	if ok && username != "" {
+		sqlCondition = sqlCondition.Where("username = ?", username)
 	}
-	if paramIn["password"] != "" {
-		sqlCondition = sqlCondition.Where("password = ?", paramIn["password"])
+	password, ok := paramIn["password"].(string)
+	if ok && password != "" {
+		sqlCondition = sqlCondition.Where("password = ?", password)
 	}
 	id, ok := paramIn["id_gte"].(float64)
 	if ok && id > 0 {
 		sqlCondition = sqlCondition.Where("id >= ?", int(id))
 	}
+	id, ok = paramIn["id_lte"].(float64)
+	if ok && id > 0 {
+		sqlCondition = sqlCondition.Where("id <= ?", int(id))
+	}
+
 	//这部分是用于order的参数
 	orderBy, ok := paramIn["order_by"].(string)
 	if ok {

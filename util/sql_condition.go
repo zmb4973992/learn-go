@@ -158,7 +158,7 @@ func (s *SqlCondition) Build(db *gorm.DB) *gorm.DB {
 }
 
 func (s *SqlCondition) Find(db *gorm.DB, model any, output any) error {
-	err := s.Build(db).Model(model).Find(&output).Error
+	err := s.Build(db).Debug().Model(model).Find(&output).Error
 	return err
 }
 

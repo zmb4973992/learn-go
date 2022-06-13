@@ -94,5 +94,4 @@ func loadConfig() {
 
 	GlobalConfig.uploadConfig.FullPath = v.GetString("upload_files.FullPath")
 	GlobalConfig.uploadConfig.MaxSizeForUpload = v.GetInt64("upload_files.MaxSizeForLog")
-	fmt.Println(GlobalConfig.FileName)
 }

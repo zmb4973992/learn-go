@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"fmt"
 	"learn-go/dto"
 	"learn-go/model"
 	"learn-go/util"
@@ -63,13 +62,13 @@ func (UserDAO) List(sqlCondition util.SqlCondition) (list []dto.UserDTO) {
 		db = db.Order(column + order)
 	}
 	//limit
+	db = db.Limit(sqlCondition.Paging.PageSize)
 
 	//offset
+	offset := (sqlCondition.Paging.Page - 1) * sqlCondition.Paging.PageSize
+	db = db.Offset(offset)
 
-	//db.Model(&model.User{}).Debug().Find(&list)
-	err := sqlCondition.Find(db, &model.User{}, &list)
-	if err != nil {
-		fmt.Println(err)
-	}
+	db.Table("user").Debug().Find(&list)
+
 	return list
 }

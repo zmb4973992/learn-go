@@ -101,10 +101,18 @@ func (userController) Delete(c *gin.Context) {
 }
 
 func (userController) List(c *gin.Context) {
-
+	type a struct {
+		Fields    []string `json:"fields"`
+		Ascending bool     `json:"ascending"`
+	}
+	var b a
+	c.ShouldBindJSON(&b)
+	fmt.Println(b.Fields)
 	//这里只处理传过来的参数，所以采用map形式,打包传给service层进行处理
 	paramIn := make(map[string]any)
+	paramIn["fields"] = []string{}
 	err := c.ShouldBindJSON(&paramIn)
+
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
 			Data:    nil,
@@ -113,7 +121,6 @@ func (userController) List(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println(paramIn) //记得删掉
 	s := new(service.UserService)
 	response := s.List(paramIn)
 	c.JSON(http.StatusOK, response)
