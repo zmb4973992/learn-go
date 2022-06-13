@@ -5,26 +5,26 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"learn-go/dao"
+	"learn-go/dto"
 	"learn-go/model"
 	"learn-go/serializer"
-	"learn-go/util"
 	"learn-go/util/status"
 	"time"
 )
 
 type RelatedPartyService struct {
 	ID                      int
-	ChineseName             *string     `form:"chinese_name"`
-	EnglishName             *string     `form:"english_name" `
-	SupplierCode            *string     `form:"supplier_code" `
-	Address                 *string     `form:"address" `
-	UniformSocialCreditCode *string     `form:"uniform_social_credit_code" ` //统一社会信用代码
-	Telephone               *string     `form:"telephone" `
-	File                    *string     `form:"-"`
-	Files                   *string     `form:"-"`
-	CreatedAt               *time.Time  `form:"created_at"`
-	UpdatedAt               *time.Time  `form:"updated_at"`
-	Paging                  util.Paging `json:"-"`
+	ChineseName             *string       `form:"chinese_name"`
+	EnglishName             *string       `form:"english_name" `
+	SupplierCode            *string       `form:"supplier_code" `
+	Address                 *string       `form:"address" `
+	UniformSocialCreditCode *string       `form:"uniform_social_credit_code" ` //统一社会信用代码
+	Telephone               *string       `form:"telephone" `
+	File                    *string       `form:"-"`
+	Files                   *string       `form:"-"`
+	CreatedAt               *time.Time    `form:"created_at"`
+	UpdatedAt               *time.Time    `form:"updated_at"`
+	Paging                  dto.PagingDTO `json:"-"`
 }
 
 func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
@@ -35,7 +35,7 @@ func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
 		s.Paging.PageSize = 20
 	}
 	var list []RelatedPartyService
-	res := dao.DB.Debug().Scopes(util.PaginateBy(s.Paging)).
+	res := dao.DB.Debug().Scopes(dto.PaginateBy(s.Paging)).
 		Model(&model.RelatedParty{}).
 		Where("chinese_name=?", s.ChineseName).
 		Find(&list)

@@ -6,14 +6,14 @@ import (
 
 type SqlCondition struct {
 	SelectedColumns []string
-	ParameterPairs  []ParameterPair
-	OrderByColumns  []OrderBy
-	PagingRule      *Paging
+	ParamPairs      []ParamPair
+	OrderBy         OrderBy
+	Paging          Paging
 }
 
-type ParameterPair struct {
-	ParameterKey   string //查询参数的名称，如 age>=, name include, id=
-	ParameterValue any    //查询参数的值
+type ParamPair struct {
+	ParamKey   string //查询参数的名称，如 age>=, name include, id=
+	ParamValue any    //查询参数的值
 }
 
 type OrderBy struct {
@@ -21,20 +21,22 @@ type OrderBy struct {
 	Ascending bool   //是否为升序（从小到大）
 }
 
+type Paging struct {
+	Page     int `json:"page"`
+	PageSize int `json:"page_size"`
+}
+
 // NewSqlCondition 生成自定义的查询条件,参数可不填
-func NewSqlCondition(selectedColumns ...string) *SqlCondition {
-	result := &SqlCondition{}
-	if len(selectedColumns) > 0 {
-		result.SelectedColumns = append(result.SelectedColumns, selectedColumns...)
-	}
-	return result
+//必须为指针，因为下面的方法要用到指针进行修改入参
+func NewSqlCondition() *SqlCondition {
+	return &SqlCondition{}
 }
 
 // Where 给SqlCondition自定义where方法，将参数保存到ParameterPair中
-func (s *SqlCondition) Where(parameterKey string, parameterValue any) *SqlCondition {
-	s.ParameterPairs = append(s.ParameterPairs, ParameterPair{
-		ParameterKey:   parameterKey,
-		ParameterValue: parameterValue,
+func (s *SqlCondition) Where(key string, value any) *SqlCondition {
+	s.ParamPairs = append(s.ParamPairs, ParamPair{
+		ParamKey:   key,
+		ParamValue: value,
 	})
 	return s
 }
@@ -49,22 +51,22 @@ func (s *SqlCondition) NotEqual(parameterKey string, parameterValue any) *SqlCon
 	return s
 }
 
-func (s *SqlCondition) GreaterThan(parameterKey string, parameterValue int) *SqlCondition {
+func (s *SqlCondition) Gt(parameterKey string, parameterValue int) *SqlCondition {
 	s.Where(parameterKey+" > ?", parameterValue)
 	return s
 }
 
-func (s *SqlCondition) GreaterThanOrEqual(parameterKey string, parameterValue int) *SqlCondition {
+func (s *SqlCondition) Gte(parameterKey string, parameterValue int) *SqlCondition {
 	s.Where(parameterKey+" >= ?", parameterValue)
 	return s
 }
 
-func (s *SqlCondition) LessThan(parameterKey string, parameterValue int) *SqlCondition {
+func (s *SqlCondition) Lt(parameterKey string, parameterValue int) *SqlCondition {
 	s.Where(parameterKey+" < ?", parameterValue)
 	return s
 }
 
-func (s *SqlCondition) LessThanOrEqual(parameterKey string, parameterValue int) *SqlCondition {
+func (s *SqlCondition) Lte(parameterKey string, parameterValue int) *SqlCondition {
 	s.Where(parameterKey+" <= ?", parameterValue)
 	return s
 }
@@ -89,74 +91,75 @@ func (s *SqlCondition) In(parameterKey string, parameterValue string) *SqlCondit
 	return s
 }
 
-func (s *SqlCondition) Ascending(parameterKey string) *SqlCondition {
-	s.OrderByColumns = append(s.OrderByColumns, OrderBy{
-		Column:    parameterKey,
-		Ascending: true,
-	})
-	return s
-}
+//func (s *SqlCondition) Ascending(parameterKey string) *SqlCondition {
+//	s.OrderBy = append(s.OrderBy, OrderBy{
+//		Column:    parameterKey,
+//		Ascending: true,
+//	})
+//	return s
+//}
+//
+//func (s *SqlCondition) Descending(parameterKey string) *SqlCondition {
+//	s.OrderBy = append(s.OrderBy, OrderBy{
+//		Column:    parameterKey,
+//		Ascending: false,
+//	})
+//	return s
+//}
 
-func (s *SqlCondition) Descending(parameterKey string) *SqlCondition {
-	s.OrderByColumns = append(s.OrderByColumns, OrderBy{
-		Column:    parameterKey,
-		Ascending: false,
-	})
-	return s
-}
-
-func (s *SqlCondition) Paginate(page int, pageSize int) *SqlCondition {
-	if s.PagingRule == nil {
-		s.PagingRule = &Paging{
-			Page:     page,
-			PageSize: pageSize,
-		}
-	} else {
-		s.PagingRule.Page = page
-		s.PagingRule.PageSize = pageSize
-	}
-	return s
-}
+//func (s *SqlCondition) Paginate(page int, pageSize int) *SqlCondition {
+//	if s.Paging == nil {
+//		s.Paging = &dto.PagingDTO{
+//			Page:     page,
+//			PageSize: pageSize,
+//		}
+//	} else {
+//		s.Paging.Page = page
+//		s.Paging.PageSize = pageSize
+//	}
+//	return s
+//}
 
 func (s *SqlCondition) Build(db *gorm.DB) *gorm.DB {
 	//处理顺序：select → where → order → limit → offset
-	//选择要传递的字段,select columns
+	//select
 	if len(s.SelectedColumns) > 0 {
 		db = db.Select(s.SelectedColumns)
 	}
 	//where
-	if len(s.ParameterPairs) > 0 {
-		for _, parameterPair := range s.ParameterPairs {
-			db = db.Where(parameterPair.ParameterKey, parameterPair.ParameterValue)
+	if len(s.ParamPairs) > 0 {
+		for _, parameterPair := range s.ParamPairs {
+			db = db.Where(parameterPair.ParamKey, parameterPair.ParamValue)
 		}
 	}
 	//order
-	if len(s.OrderByColumns) > 0 {
-		for _, orderByColumn := range s.OrderByColumns {
-			if orderByColumn.Ascending == true {
-				db = db.Order(orderByColumn.Column + "ASC")
-			} else {
-				db = db.Order(orderByColumn.Column + "DESC")
-			}
-		}
+	var order string
+	if s.OrderBy.Ascending == true {
+		order = ""
+	} else {
+		order = " desc"
+	}
+	column := s.OrderBy.Column
+	if column != "" {
+		db = db.Order(column + order)
 	}
 	//limit
-	if s.PagingRule != nil && s.PagingRule.PageSize > 0 {
-		db = db.Limit(s.PagingRule.PageSize)
-	}
+	//if s.Paging != nil && s.Paging.PageSize > 0 {
+	//	db = db.Limit(s.Paging.PageSize)
+	//}
 
 	//offset
-	offset := s.PagingRule.Offset()
-	if s.PagingRule != nil && offset > 0 {
-		db = db.Offset(offset)
-	}
+	//offset := s.Paging.Offset()
+	//if s.Paging != nil && offset > 0 {
+	//	db = db.Offset(offset)
+	//}
+
 	return db
 }
 
-func (s *SqlCondition) Find(db *gorm.DB) (any, error) {
-	var output any
-	err := s.Build(db).Find(&output).Error
-	return output, err
+func (s *SqlCondition) Find(db *gorm.DB, model any, output any) error {
+	err := s.Build(db).Model(model).Find(&output).Error
+	return err
 }
 
 // Count 第二个参数应为model类型的指针，如：&model.User{}
@@ -164,9 +167,9 @@ func (s *SqlCondition) Find(db *gorm.DB) (any, error) {
 func (s *SqlCondition) Count(db *gorm.DB, model any) int {
 	result := db.Model(model)
 	// where
-	if len(s.ParameterPairs) > 0 {
-		for _, parameterPair := range s.ParameterPairs {
-			result = result.Where(parameterPair.ParameterKey, parameterPair.ParameterValue)
+	if len(s.ParamPairs) > 0 {
+		for _, parameterPair := range s.ParamPairs {
+			result = result.Where(parameterPair.ParamKey, parameterPair.ParamValue)
 		}
 	}
 	var count int64

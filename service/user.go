@@ -108,21 +108,47 @@ func (UserService) Delete(id int) serializer.ResponseForDetail {
 }
 
 func (UserService) List(paramIn map[string]any) serializer.ResponseForDetail {
-	//默认生成的sqlCondition中，page=1，pageSize=20
+	//生成sql查询条件
 	sqlCondition := util.NewSqlCondition()
-	//如果参数里的page是整数且大于0：
-	page, ok := paramIn["page"].(int)
+	//对paramIn进行清洗
+	//这部分是用于where的参数
+	//如果类型为any，那么go会把数字识别为float64，需要在这里进行转化
+	page, ok := paramIn["page"].(float64)
 	if ok && page > 0 {
-		sqlCondition.PagingRule.Page = page
+		sqlCondition.Paging.Page = int(page)
 	}
-	//如果参数里的pageSize是整数且大于0：
-	pageSize, ok := paramIn["page_size"].(int)
-	if ok && pageSize > 0 {
-		sqlCondition.PagingRule.PageSize = pageSize
+	//如果参数里的pageSize是整数且大于0、小于等于100：
+	pageSize, ok := paramIn["page_size"].(float64)
+	if ok && pageSize > 0 && pageSize <= 100 {
+		sqlCondition.Paging.PageSize = int(pageSize)
 	}
+	if paramIn["username"] != "" {
+		sqlCondition = sqlCondition.Where("username = ?", paramIn["username"])
+	}
+	if paramIn["password"] != "" {
+		sqlCondition = sqlCondition.Where("password = ?", paramIn["password"])
+	}
+	id, ok := paramIn["id_gte"].(float64)
+	if ok && id > 0 {
+		sqlCondition = sqlCondition.Where("id >= ?", int(id))
+	}
+	//这部分是用于order的参数
+	orderBy, ok := paramIn["order_by"].(string)
+	if ok {
+		ascending, ok := paramIn["ascending"].(bool)
+		//要考虑前端只传orderBy字段、没传顺序方向字段
+		if ok { //如果传了顺序方向，就用传来的值
+			sqlCondition.OrderBy.Column = orderBy
+			sqlCondition.OrderBy.Ascending = ascending
+		} else { //如果没传顺序方向或读取错误，就默认为升序，从小到大
+			sqlCondition.OrderBy.Column = orderBy
+			sqlCondition.OrderBy.Ascending = true
+		}
+	}
+
 	//新建一个dao.User结构体的实例
 	u := new(dao.UserDAO)
-	list, _ := u.List(*sqlCondition)
+	list := u.List(*sqlCondition)
 	return serializer.ResponseForDetail{
 		Data:    list,
 		Code:    status.Success,

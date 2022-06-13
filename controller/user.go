@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"learn-go/dto"
 	"learn-go/serializer"
@@ -100,9 +101,10 @@ func (userController) Delete(c *gin.Context) {
 }
 
 func (userController) List(c *gin.Context) {
+
 	//这里只处理传过来的参数，所以采用map形式,打包传给service层进行处理
 	paramIn := make(map[string]any)
-	err := c.ShouldBindJSON(&paramIn) //不需要处理错误，如果绑定不上，下面的方法会自动使用默认值
+	err := c.ShouldBindJSON(&paramIn)
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
 			Data:    nil,
@@ -111,6 +113,7 @@ func (userController) List(c *gin.Context) {
 		})
 		return
 	}
+	fmt.Println(paramIn) //记得删掉
 	s := new(service.UserService)
 	response := s.List(paramIn)
 	c.JSON(http.StatusOK, response)

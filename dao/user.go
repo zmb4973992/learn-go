@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"fmt"
 	"learn-go/dto"
 	"learn-go/model"
 	"learn-go/util"
@@ -40,12 +41,35 @@ func (UserDAO) Delete(id int) error {
 }
 
 // List 入参为sql查询条件，结果为数据列表+分页情况
-func (UserDAO) List(sqlCondition util.SqlCondition) (list []dto.UserDTO, count int) {
-	tempList, err := sqlCondition.Find(DB)
-	if err != nil {
-		return nil, 0
+func (UserDAO) List(sqlCondition util.SqlCondition) (list []dto.UserDTO) {
+	db := DB
+	//select
+	if len(sqlCondition.SelectedColumns) > 0 {
+		db = db.Select(sqlCondition.SelectedColumns)
 	}
-	count = sqlCondition.Count(DB, &model.User{})
-	list = tempList.([]dto.UserDTO)
-	return list, count
+	//where
+	for _, paramPair := range sqlCondition.ParamPairs {
+		db = db.Where(paramPair.ParamKey, paramPair.ParamValue)
+	}
+	//orderBy
+	var order string
+	if sqlCondition.OrderBy.Ascending == true {
+		order = ""
+	} else {
+		order = " desc"
+	}
+	column := sqlCondition.OrderBy.Column
+	if column != "" {
+		db = db.Order(column + order)
+	}
+	//limit
+
+	//offset
+
+	//db.Model(&model.User{}).Debug().Find(&list)
+	err := sqlCondition.Find(db, &model.User{}, &list)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return list
 }
