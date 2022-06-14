@@ -2,13 +2,14 @@ package util
 
 import (
 	"gorm.io/gorm"
+	"learn-go/dto"
 )
 
 type SqlCondition struct {
 	SelectedColumns []string
 	ParamPairs      []ParamPair
-	OrderBy         OrderBy
-	Paging          Paging
+	OrderBy         dto.OrderByDTO
+	Paging          dto.PagingDTO
 }
 
 type ParamPair struct {
@@ -16,20 +17,15 @@ type ParamPair struct {
 	ParamValue any    //查询参数的值
 }
 
-type OrderBy struct {
-	Column    string //排序字段
-	Ascending bool   //是否为升序（从小到大）
-}
-
-type Paging struct {
-	Page     int `json:"page"`
-	PageSize int `json:"page_size"`
-}
-
 // NewSqlCondition 生成自定义的查询条件,参数可不填
 //必须为指针，因为下面的方法要用到指针进行修改入参
 func NewSqlCondition() *SqlCondition {
-	return &SqlCondition{}
+	return &SqlCondition{
+		Paging: dto.PagingDTO{
+			Page:     1,
+			PageSize: 20,
+		},
+	}
 }
 
 // Where 给SqlCondition自定义where方法，将参数保存到ParameterPair中
@@ -41,67 +37,74 @@ func (s *SqlCondition) Where(key string, value any) *SqlCondition {
 	return s
 }
 
-func (s *SqlCondition) Equal(parameterKey string, parameterValue any) *SqlCondition {
-	s.Where(parameterKey+" = ? ", parameterValue)
+func (s *SqlCondition) Equal(paramKey string, paramValue any) *SqlCondition {
+	s.Where(paramKey+" = ? ", paramValue)
 	return s
 }
 
-func (s *SqlCondition) NotEqual(parameterKey string, parameterValue any) *SqlCondition {
-	s.Where(parameterKey+" <> ?", parameterValue)
+func (s *SqlCondition) NotEqual(paramKey string, paramValue any) *SqlCondition {
+	s.Where(paramKey+" <> ?", paramValue)
 	return s
 }
 
-func (s *SqlCondition) Gt(parameterKey string, parameterValue int) *SqlCondition {
-	s.Where(parameterKey+" > ?", parameterValue)
+func (s *SqlCondition) Gt(paramKey string, paramValue int) *SqlCondition {
+	s.Where(paramKey+" > ?", paramValue)
 	return s
 }
 
-func (s *SqlCondition) Gte(parameterKey string, parameterValue int) *SqlCondition {
-	s.Where(parameterKey+" >= ?", parameterValue)
+func (s *SqlCondition) Gte(paramKey string, paramValue int) *SqlCondition {
+	s.Where(paramKey+" >= ?", paramValue)
 	return s
 }
 
-func (s *SqlCondition) Lt(parameterKey string, parameterValue int) *SqlCondition {
-	s.Where(parameterKey+" < ?", parameterValue)
+func (s *SqlCondition) Lt(paramKey string, paramValue int) *SqlCondition {
+	s.Where(paramKey+" < ?", paramValue)
 	return s
 }
 
-func (s *SqlCondition) Lte(parameterKey string, parameterValue int) *SqlCondition {
-	s.Where(parameterKey+" <= ?", parameterValue)
+func (s *SqlCondition) Lte(paramKey string, paramValue int) *SqlCondition {
+	s.Where(paramKey+" <= ?", paramValue)
 	return s
 }
 
-func (s *SqlCondition) Like(parameterKey string, parameterValue string) *SqlCondition {
-	s.Where(parameterKey+" LIKE ?", "%"+parameterValue+"%")
+// Include 和Like为相同方法
+func (s *SqlCondition) Include(paramKey string, paramValue string) *SqlCondition {
+	s.Where(paramKey+" LIKE ?", "%"+paramValue+"%")
 	return s
 }
 
-func (s *SqlCondition) StartWith(parameterKey string, parameterValue string) *SqlCondition {
-	s.Where(parameterKey+" LIKE ?", parameterValue+"%")
+// Like 和Include为相同方法
+func (s *SqlCondition) Like(paramKey string, paramValue string) *SqlCondition {
+	s.Where(paramKey+" LIKE ?", "%"+paramValue+"%")
 	return s
 }
 
-func (s *SqlCondition) EndWith(parameterKey string, parameterValue string) *SqlCondition {
-	s.Where(parameterKey+" LIKE ?", "%"+parameterValue)
+func (s *SqlCondition) StartWith(paramKey string, paramValue string) *SqlCondition {
+	s.Where(paramKey+" LIKE ?", paramValue+"%")
 	return s
 }
 
-func (s *SqlCondition) In(parameterKey string, parameterValue string) *SqlCondition {
-	s.Where(parameterKey+" IN ?", parameterValue)
+func (s *SqlCondition) EndWith(paramKey string, paramValue string) *SqlCondition {
+	s.Where(paramKey+" LIKE ?", "%"+paramValue)
+	return s
+}
+
+func (s *SqlCondition) In(paramKey string, paramValue string) *SqlCondition {
+	s.Where(paramKey+" IN ?", paramValue)
 	return s
 }
 
 //func (s *SqlCondition) Ascending(parameterKey string) *SqlCondition {
-//	s.OrderBy = append(s.OrderBy, OrderBy{
-//		Column:    parameterKey,
+//	s.OrderByDTO = append(s.OrderByDTO, OrderByDTO{
+//		OrderByColumn:    parameterKey,
 //		Ascending: true,
 //	})
 //	return s
 //}
 //
 //func (s *SqlCondition) Descending(parameterKey string) *SqlCondition {
-//	s.OrderBy = append(s.OrderBy, OrderBy{
-//		Column:    parameterKey,
+//	s.OrderByDTO = append(s.OrderByDTO, OrderByDTO{
+//		OrderByColumn:    parameterKey,
 //		Ascending: false,
 //	})
 //	return s
@@ -133,15 +136,11 @@ func (s *SqlCondition) Build(db *gorm.DB) *gorm.DB {
 		}
 	}
 	//order
-	var order string
-	if s.OrderBy.Ascending == true {
-		order = ""
-	} else {
-		order = " desc"
-	}
-	column := s.OrderBy.Column
-	if column != "" {
-		db = db.Order(column + order)
+	if s.OrderBy.OrderByColumn != "" {
+		if s.OrderBy.Desc == true {
+			db = db.Order(s.OrderBy.OrderByColumn + " desc")
+		}
+		db = db.Order(s.OrderBy.OrderByColumn)
 	}
 	//limit
 	//if s.Paging != nil && s.Paging.PageSize > 0 {

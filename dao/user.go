@@ -51,16 +51,14 @@ func (UserDAO) List(sqlCondition util.SqlCondition) (list []dto.UserDTO) {
 		db = db.Where(paramPair.ParamKey, paramPair.ParamValue)
 	}
 	//orderBy
-	var order string
-	if sqlCondition.OrderBy.Ascending == true {
-		order = ""
-	} else {
-		order = " desc"
+	if sqlCondition.OrderBy.OrderByColumn != "" {
+		if sqlCondition.OrderBy.Desc == true {
+			db = db.Order(sqlCondition.OrderBy.OrderByColumn + " desc")
+		} else {
+			db = db.Order(sqlCondition.OrderBy.OrderByColumn)
+		}
 	}
-	column := sqlCondition.OrderBy.Column
-	if column != "" {
-		db = db.Order(column + order)
-	}
+
 	//limit
 	db = db.Limit(sqlCondition.Paging.PageSize)
 
@@ -68,7 +66,7 @@ func (UserDAO) List(sqlCondition util.SqlCondition) (list []dto.UserDTO) {
 	offset := (sqlCondition.Paging.Page - 1) * sqlCondition.Paging.PageSize
 	db = db.Offset(offset)
 
-	db.Table("user").Debug().Find(&list)
+	db.Model(&model.User{}).Debug().Find(&list)
 
 	return list
 }

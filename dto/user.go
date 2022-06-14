@@ -5,3 +5,17 @@ type UserDTO struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
+type UserSearchDTO struct {
+	ID    int  `form:"id"`
+	IDGte *int `form:"id_gte"`
+	IDLte *int `form:"id_lte"`
+
+	Username         string `form:"username"`
+	UsernameNotEqual string `form:"username_ne"`
+	UsernameInclude  string `form:"username_include"`
+	Password         string `form:"password"`
+
+	Paging  PagingDTO
+	OrderBy OrderByDTO
+}

@@ -5,26 +5,24 @@ import (
 )
 
 type PagingDTO struct {
-	Page     int `json:"page"`
-	PageSize int `json:"page_size"`
+	Page     int `form:"page"`
+	PageSize int `form:"page_size"`
 }
 
-// NewPagingDTO 生成pagingDTO，默认为第一页，每页数据20条
-func NewPagingDTO() PagingDTO {
-	return PagingDTO{
-		Page:     1,
-		PageSize: 20,
-	}
+type OrderByDTO struct {
+	OrderByColumn string `form:"order_by"` //排序字段
+	Desc          bool   `form:"desc"`     //是否为降序（从大到小）
 }
 
-func (p *PagingDTO) Offset() int {
-	offset := 0
-	if p.Page > 0 {
-		offset = (p.Page - 1) * p.PageSize
-	}
-	return offset
-}
+//func (p *PagingDTO) Offset() int {
+//	offset := 0
+//	if p.Page > 0 {
+//		offset = (p.Page - 1) * p.PageSize
+//	}
+//	return offset
+//}
 
+// PaginateBy 拟废除，不要再用了
 func PaginateBy(rule PagingDTO) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		if rule.Page <= 0 {
@@ -41,7 +39,7 @@ func PaginateBy(rule PagingDTO) func(db *gorm.DB) *gorm.DB {
 	}
 }
 
-// GetTotalPage 使用前请确保两个参数均大于0，否则结果会返回0
+// GetTotalPage 使用前请确保两个参数均大于0，否则结果会返回0。拟废除，不要再用了
 func GetTotalPage(totalNumberOfRecord int, pageSize int) (totalPage int) {
 	if totalNumberOfRecord <= 0 || pageSize <= 0 {
 		return 0

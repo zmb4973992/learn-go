@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"learn-go/dao"
 	"learn-go/dto"
@@ -107,53 +108,63 @@ func (UserService) Delete(id int) serializer.ResponseForDetail {
 	}
 }
 
-func (UserService) List(paramIn map[string]any) serializer.ResponseForDetail {
+func (UserService) List(paramIn dto.UserSearchDTO) serializer.ResponseForDetail {
 	//生成sql查询条件
 	sqlCondition := util.NewSqlCondition()
 	//对paramIn进行清洗
 	//这部分是用于where的参数
-	//如果类型为any，那么go会把数字识别为float64，需要在这里进行转化
-
-	page, ok := paramIn["page"].(float64)
-	if ok && page > 0 {
-		sqlCondition.Paging.Page = int(page)
+	page := paramIn.Paging.Page
+	if page > 0 {
+		sqlCondition.Paging.Page = page
 	}
 	//如果参数里的pageSize是整数且大于0、小于等于100：
-	pageSize, ok := paramIn["page_size"].(float64)
-	if ok && pageSize > 0 && pageSize <= 100 {
-		sqlCondition.Paging.PageSize = int(pageSize)
+	pageSize := paramIn.Paging.PageSize
+	if pageSize > 0 && pageSize <= 100 {
+		sqlCondition.Paging.PageSize = pageSize
 	}
-	username, ok := paramIn["username"].(string)
-	if ok && username != "" {
+	id := paramIn.ID
+	if id > 0 {
+		sqlCondition.Where("id", id)
+	}
+
+	idGte := paramIn.IDGte
+	if idGte != nil && *idGte >= 0 {
+		sqlCondition.Gte("id", *idGte)
+	}
+	idLte := paramIn.IDLte
+	if idLte != nil && *idLte >= 0 {
+		sqlCondition.Lte("id", *idLte)
+	}
+	username := paramIn.Username
+	if username != "" {
 		sqlCondition = sqlCondition.Where("username = ?", username)
 	}
-	password, ok := paramIn["password"].(string)
-	if ok && password != "" {
+	password := paramIn.Password
+	if password != "" {
 		sqlCondition = sqlCondition.Where("password = ?", password)
 	}
-	id, ok := paramIn["id_gte"].(float64)
-	if ok && id > 0 {
-		sqlCondition = sqlCondition.Where("id >= ?", int(id))
+	usernameNoteEqual := paramIn.UsernameNotEqual
+	if usernameNoteEqual != "" {
+		sqlCondition = sqlCondition.NotEqual("username", usernameNoteEqual)
 	}
-	id, ok = paramIn["id_lte"].(float64)
-	if ok && id > 0 {
-		sqlCondition = sqlCondition.Where("id <= ?", int(id))
+	usernameInclude := paramIn.UsernameInclude
+	if usernameInclude != "" {
+		sqlCondition = sqlCondition.Include("username", usernameInclude)
 	}
 
 	//这部分是用于order的参数
-	orderBy, ok := paramIn["order_by"].(string)
-	if ok {
-		ascending, ok := paramIn["ascending"].(bool)
-		//要考虑前端只传orderBy字段、没传顺序方向字段
-		if ok { //如果传了顺序方向，就用传来的值
-			sqlCondition.OrderBy.Column = orderBy
-			sqlCondition.OrderBy.Ascending = ascending
-		} else { //如果没传顺序方向或读取错误，就默认为升序，从小到大
-			sqlCondition.OrderBy.Column = orderBy
-			sqlCondition.OrderBy.Ascending = true
-		}
+	column := paramIn.OrderBy.OrderByColumn
+	if column != "" {
+		sqlCondition.OrderBy.OrderByColumn = column
 	}
-
+	desc := paramIn.OrderBy.Desc
+	if desc == true {
+		sqlCondition.OrderBy.Desc = true
+	} else {
+		sqlCondition.OrderBy.Desc = false
+	}
+	fmt.Println(sqlCondition.Paging.Page)
+	fmt.Println(sqlCondition.Paging.PageSize)
 	//新建一个dao.User结构体的实例
 	u := new(dao.UserDAO)
 	list := u.List(*sqlCondition)
