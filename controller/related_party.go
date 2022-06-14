@@ -2,9 +2,9 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"learn-go/dto"
 	"learn-go/serializer"
 	"learn-go/service"
-	"learn-go/util"
 	"learn-go/util/status"
 	"net/http"
 	"strconv"
@@ -12,14 +12,14 @@ import (
 
 // IRelatedPartyController 使用简单工厂模式,公开接口、公开创建结构体的方法，隐藏结构体
 type IRelatedPartyController interface {
-	GetRelatedParty(c *gin.Context)
-	UpdateRelatedParty(c *gin.Context)
-	CreateRelatedParty(c *gin.Context)
-	DeleteRelatedParty(c *gin.Context)
-	GetRelatedPartyList(c *gin.Context)
+	Create(c *gin.Context)
+	Get(c *gin.Context)
+	Update(c *gin.Context)
+	Delete(c *gin.Context)
+	List(c *gin.Context)
 }
 
-//继承baseController，获取相关的方法
+//继承baseController，获得相关方法，避免反复重写
 type relatedPartyController struct {
 	baseController
 }
@@ -28,54 +28,77 @@ func NewRelatedPartyController() IRelatedPartyController {
 	return relatedPartyController{}
 }
 
-func (relatedPartyController) GetRelatedPartyList(c *gin.Context) {
-	var s service.RelatedPartyService
-	c.ShouldBind(&s)
-	//var response serializer.ResponseForList
-	response := service.GetRelatedPartyList(s)
-	c.JSON(http.StatusOK, response)
-}
-
-func (relatedPartyController) GetRelatedParty(c *gin.Context) {
-	relatedPartyID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	res, _ := service.GetDetailOfRelatedParty(relatedPartyID)
-	c.JSON(http.StatusOK, res)
-
-}
-
-func (relatedPartyController) UpdateRelatedParty(c *gin.Context) {
-	var paramIn service.RelatedPartyService
-	err := c.ShouldBind(&paramIn)
+func (r relatedPartyController) Get(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusOK, serializer.ResponseForDetail{
+		c.JSON(http.StatusBadRequest, serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    status.Error,
-			Message: status.GetMessage(status.Error),
+			Code:    status.ErrorInvalidURIParameters,
+			Message: status.GetMessage(status.ErrorInvalidURIParameters),
 		})
 		return
 	}
-	paramIn.ID, _ = strconv.Atoi(c.Param("id")) //把uri上的id参数传递给结构体形式的入参
-	res := service.UpdateRelatedParty(paramIn)
+	s := service.NewRelatedPartyService()
+	res := s.Get(id)
+	if res == nil {
+		c.JSON(http.StatusOK, serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorRecordNotFound,
+			Message: status.GetMessage(status.ErrorRecordNotFound),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, serializer.ResponseForDetail{
+		Data:    res,
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
+	})
+	return
+}
+
+func (relatedPartyController) Update(c *gin.Context) {
+	var paramIn dto.RelatedPartyDTO
+	//先把json参数绑定到dto
+	err := c.ShouldBindJSON(&paramIn)
+	if err != nil {
+		c.JSON(http.StatusOK, serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorInvalidJsonParameters,
+			Message: status.GetMessage(status.ErrorInvalidJsonParameters),
+		})
+		return
+	}
+	//把uri上的id参数传递给结构体形式的入参
+	paramIn.ID, err = strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusOK, serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorInvalidURIParameters,
+			Message: status.GetMessage(status.ErrorInvalidURIParameters),
+		})
+		return
+	}
+	s := service.NewRelatedPartyService()
+	res := s.Update(paramIn)
 	c.JSON(200, res)
 }
 
-func (relatedPartyController) CreateRelatedParty(c *gin.Context) {
-	var s service.RelatedPartyService
-	err := c.ShouldBind(&s)
+func (relatedPartyController) Create(c *gin.Context) {
+	//先声明空的dto，再把context里的数据绑到dto上
+	var r dto.RelatedPartyDTO
+	err := c.ShouldBindJSON(&r)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, serializer.NewErrorResponse(status.ErrorInvalidFormDataParameters))
+		c.JSON(http.StatusBadRequest, serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorInvalidJsonParameters,
+			Message: status.GetMessage(status.ErrorInvalidJsonParameters),
+		})
 		return
 	}
-	filename, _ := util.UploadSingleFile(c, "file")
-	if filename != nil {
-		s.File = filename
-	}
-	filenames, _ := util.UploadMultipleFiles(c, "files")
-	if filenames != nil {
-		s.Files = filenames
-	}
-	res := service.CreateRelatedParty(s)
+	s := service.NewRelatedPartyService()
+	res := s.Create(&r)
 	c.JSON(http.StatusOK, res)
+	return
 }
 
 func newd() {
@@ -106,7 +129,7 @@ func newd() {
 //	return
 //}
 
-func (relatedPartyController) DeleteRelatedParty(c *gin.Context) {
+func (relatedPartyController) Delete(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
@@ -118,4 +141,12 @@ func (relatedPartyController) DeleteRelatedParty(c *gin.Context) {
 	}
 	res := service.DeleteRelatedParty(id)
 	c.JSON(http.StatusOK, res)
+}
+
+func (relatedPartyController) List(c *gin.Context) {
+	var s service.RelatedPartyService
+	c.ShouldBind(&s)
+	//var response serializer.ResponseForList
+	response := service.GetRelatedPartyList(s)
+	c.JSON(http.StatusOK, response)
 }

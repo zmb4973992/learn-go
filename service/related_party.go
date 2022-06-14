@@ -12,7 +12,11 @@ import (
 	"time"
 )
 
+// UserService 没有数据、只有方法，所有的数据都放在DTO里
+//这里的方法从controller拿来初步处理的入参，重点是处理业务逻辑
+//所有的增删改查都交给DAO层处理，否则service层会非常庞大
 type RelatedPartyService struct {
+	baseService
 	ID                      int
 	ChineseName             *string       `form:"chinese_name"`
 	EnglishName             *string       `form:"english_name" `
@@ -25,6 +29,16 @@ type RelatedPartyService struct {
 	CreatedAt               *time.Time    `form:"created_at"`
 	UpdatedAt               *time.Time    `form:"updated_at"`
 	Paging                  dto.PagingDTO `json:"-"`
+}
+
+func NewRelatedPartyService() RelatedPartyService {
+	return RelatedPartyService{}
+}
+
+func (RelatedPartyService) Get(id int) (data *dto.RelatedPartyDTO) {
+	u := new(dao.RelatedPartyDAO)
+	data = u.Get(id)
+	return data
 }
 
 func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
@@ -86,6 +100,42 @@ func GetDetailOfRelatedParty(id int64) (*serializer.ResponseForDetail, error) {
 	}, nil
 }
 
+func (RelatedPartyService) Update(paramIn dto.RelatedPartyDTO) serializer.ResponseForDetail {
+	//对dto进行清洗，生成dao层需要的model
+	id := paramIn.ID
+	var record model.RelatedParty
+	if paramIn.ChineseName != nil && *paramIn.ChineseName != "" {
+		record.ChineseName = paramIn.ChineseName
+	}
+	if paramIn.EnglishName != nil && *paramIn.EnglishName != "" {
+		record.EnglishName = paramIn.EnglishName
+	}
+	if paramIn.Address != nil && *paramIn.Address != "" {
+		record.Address = paramIn.Address
+	}
+	if paramIn.UniformSocialCreditCode != nil && *paramIn.UniformSocialCreditCode != "" {
+		record.UniformSocialCreditCode = paramIn.UniformSocialCreditCode
+	}
+	if paramIn.Telephone != nil && *paramIn.Telephone != "" {
+		record.Telephone = paramIn.Telephone
+	}
+	//清洗完毕，开始update
+	r := dao.NewRelatedDAO()
+	err := r.Update(id, &record)
+	if err != nil {
+		return serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorFailToSaveRecord,
+			Message: status.GetMessage(status.ErrorFailToSaveRecord),
+		}
+	}
+	return serializer.ResponseForDetail{
+		Data:    nil,
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
+	}
+}
+
 func UpdateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetail {
 	var record model.RelatedParty
 	result := dao.DB.Debug().First(&record, paramIn.ID)
@@ -116,7 +166,8 @@ func UpdateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetai
 	}
 }
 
-func CreateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetail {
+func (RelatedPartyService) Create(paramIn *dto.RelatedPartyDTO) serializer.ResponseForDetail {
+	//对dto进行清洗，生成dao层需要的model
 	var record model.RelatedParty
 	if paramIn.ChineseName != nil && *paramIn.ChineseName != "" {
 		record.ChineseName = paramIn.ChineseName
@@ -133,17 +184,21 @@ func CreateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetai
 	if paramIn.Telephone != nil && *paramIn.Telephone != "" {
 		record.Telephone = paramIn.Telephone
 	}
-	if paramIn.File != nil && *paramIn.File != "" {
-		record.File = paramIn.File
+	//清洗完毕，开始create
+	r := dao.NewRelatedDAO()
+	err := r.Create(&record)
+	if err != nil {
+		return serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorFailToSaveRecord,
+			Message: status.GetMessage(status.ErrorFailToSaveRecord),
+		}
 	}
-	if paramIn.Files != nil && *paramIn.Files != "" {
-		record.Files = paramIn.Files
+	return serializer.ResponseForDetail{
+		Data:    nil,
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
 	}
-	result := dao.DB.Debug().Create(&record)
-	if result.Error != nil {
-		return serializer.NewResponseForCreationResult(status.ErrorFailToSaveRecord, record.ID)
-	}
-	return serializer.NewResponseForCreationResult(status.Success, record.ID)
 }
 
 func DeleteRelatedParty(id int64) serializer.ResponseForDetail {

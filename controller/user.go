@@ -26,10 +26,10 @@ func NewUserController() IUserController {
 	return userController{}
 }
 
-func (userController) Get(c *gin.Context) {
+func (u userController) Get(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusOK, serializer.ResponseForDetail{
+		c.JSON(http.StatusBadRequest, serializer.ResponseForDetail{
 			Data:    nil,
 			Code:    status.ErrorInvalidURIParameters,
 			Message: status.GetMessage(status.ErrorInvalidURIParameters),
@@ -38,7 +38,19 @@ func (userController) Get(c *gin.Context) {
 	}
 	s := service.NewUserService()
 	res := s.Get(id)
-	c.JSON(http.StatusOK, res)
+	if res == nil {
+		c.JSON(http.StatusOK, serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorRecordNotFound,
+			Message: status.GetMessage(status.ErrorRecordNotFound),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, serializer.ResponseForDetail{
+		Data:    res,
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
+	})
 	return
 }
 
@@ -100,7 +112,7 @@ func (userController) Delete(c *gin.Context) {
 }
 
 func (userController) List(c *gin.Context) {
-	var userSearchDTO dto.UserSearchDTO
+	var userSearchDTO dto.UserListDTO
 	err := c.ShouldBindQuery(&userSearchDTO)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{

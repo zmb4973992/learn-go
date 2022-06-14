@@ -11,31 +11,21 @@ import (
 	"learn-go/util/status"
 )
 
+// UserService 没有数据、只有方法，所有的数据都放在DTO里
+//这里的方法从controller拿来初步处理的入参，重点是处理业务逻辑
+//所有的增删改查都交给DAO层处理，否则service层会非常庞大
 type UserService struct {
-	ID       int    `json:"id"`
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	baseService
 }
 
 func NewUserService() UserService {
 	return UserService{}
 }
 
-func (UserService) Get(id int) any {
+func (s UserService) Get(id int) (data any) {
 	u := new(dao.UserDAO)
-	data := u.Get(id)
-	if data == nil {
-		return serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.ErrorRecordNotFound,
-			Message: status.GetMessage(status.ErrorRecordNotFound),
-		}
-	}
-	return serializer.ResponseForDetail{
-		Data:    data,
-		Code:    status.Success,
-		Message: status.GetMessage(status.Success),
-	}
+	data = u.Get(id)
+	return data
 }
 
 func (UserService) Create(paramIn *dto.UserDTO) serializer.ResponseForDetail {
@@ -108,7 +98,7 @@ func (UserService) Delete(id int) serializer.ResponseForDetail {
 	}
 }
 
-func (UserService) List(paramIn dto.UserSearchDTO) serializer.ResponseForDetail {
+func (UserService) List(paramIn dto.UserListDTO) serializer.ResponseForDetail {
 	//生成sql查询条件
 	sqlCondition := util.NewSqlCondition()
 	//对paramIn进行清洗

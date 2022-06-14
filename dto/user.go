@@ -6,7 +6,7 @@ type UserDTO struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type UserSearchDTO struct {
+type UserListDTO struct {
 	ID    int  `form:"id"`
 	IDGte *int `form:"id_gte"`
 	IDLte *int `form:"id_lte"`

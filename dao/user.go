@@ -9,12 +9,12 @@ import (
 type UserDAO struct{}
 
 func (UserDAO) Get(id int) *dto.UserDTO {
-	var u *dto.UserDTO
+	var u dto.UserDTO
 	err := DB.Model(&model.User{}).Where("id = ?", id).First(&u).Error
 	if err != nil {
 		return nil
 	}
-	return u
+	return &u
 }
 
 // Create 这里是只负责新增，不写任何业务逻辑。只要收到参数就创建数据库记录，然后返回错误
