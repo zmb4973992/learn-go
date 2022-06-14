@@ -28,7 +28,8 @@ const (
 	ErrorAccessTokenInvalid  int = 3001
 	ErrorAccessTokenNotFound int = 3002
 
-	ErrorFailToEncrypt int = 4001
+	ErrorFailToEncrypt  int = 4001
+	ErrorInvalidRequest int = 4002
 )
 
 // Message 自定义错误的message
@@ -52,7 +53,8 @@ var Message = map[int]string{
 	ErrorAccessTokenInvalid:  "access_token无效",
 	ErrorAccessTokenNotFound: "缺少access_token",
 
-	ErrorFailToEncrypt: "加密失败",
+	ErrorFailToEncrypt:  "加密失败",
+	ErrorInvalidRequest: "无效请求",
 }
 
 func GetMessage(code int) string {

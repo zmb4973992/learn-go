@@ -19,6 +19,7 @@ func Init() *gin.Engine {
 	//创建所有的控制器
 	userController := controller.NewUserController()
 	relatedPartyController := controller.NewRelatedPartyController()
+	noRouteController := controller.NewNoRouteController()
 
 	engine.POST("/api/user", userController.Create) //添加用户
 	//依次加载所有的路由组，以下都需要经过jwt验证
@@ -35,6 +36,8 @@ func Init() *gin.Engine {
 		api.POST("/related_party", relatedPartyController.Create)    //添加详情
 		api.DELETE("/:id", relatedPartyController.Delete)            //删除详情
 	}
+
+	engine.NoRoute(noRouteController.NoRoute)
 
 	//引擎处理完成后，返回
 	return engine
