@@ -15,9 +15,9 @@ const (
 	ErrorInvalidFormDataParameters int = 1004
 	// ErrorInvalidJsonParameters json参数无效
 	ErrorInvalidJsonParameters int = 1005
-	// ErrorFailToSaveRecord 保存记录失败
+	// ErrorFailToSaveRecord 保存记录失败，请重试
 	ErrorFailToSaveRecord int = 1006
-	// ErrorFailToDeleteRecord 删除记录失败
+	// ErrorFailToDeleteRecord 删除记录失败，请重试
 	ErrorFailToDeleteRecord int = 1007
 	ErrorFileTooLarge       int = 1008
 
@@ -54,7 +54,7 @@ var Message = map[int]string{
 	ErrorAccessTokenNotFound: "缺少access_token",
 
 	ErrorFailToEncrypt:  "加密失败",
-	ErrorInvalidRequest: "无效请求",
+	ErrorInvalidRequest: "请求路径错误",
 }
 
 func GetMessage(code int) string {

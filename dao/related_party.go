@@ -5,6 +5,12 @@ import (
 	"learn-go/model"
 )
 
+/*
+dao层的基本原则：
+入参为id或model，用于对数据库进行增删改查；
+出参为err或dto，用于反馈结果或给其他层使用
+*/
+
 func NewRelatedDAO() RelatedPartyDAO {
 	return RelatedPartyDAO{}
 }
@@ -30,7 +36,16 @@ func (RelatedPartyDAO) Create(paramIn *model.RelatedParty) error {
 	return err
 }
 
-func (RelatedPartyDAO) Update(id int, paramIn *model.RelatedParty) error {
-	err := DB.Debug().Where("id = ?", id).Updates(&paramIn).Error
+func (RelatedPartyDAO) Update(paramIn *model.RelatedParty) error {
+	err = DB.Debug().Where("id = ?", paramIn.ID).Updates(paramIn).Error
+	if *paramIn.ChineseName == "<empty>" {
+
+	}
+	return err
+}
+
+func (RelatedPartyDAO) Delete(id int) error {
+	err := DB.Debug().Delete(&model.RelatedParty{}, id).Error
+
 	return err
 }

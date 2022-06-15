@@ -31,8 +31,10 @@ func Init() {
 		&model.RelatedParty{},
 		&model.Project{},
 		&model.User{},
-		&model.Test{},
+		&model.Role{},
+		&model.RoleAndUser{},
 	)
+
 	if err != nil {
 		panic(err)
 	}

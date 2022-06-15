@@ -1,9 +1,7 @@
 package service
 
 import (
-	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"learn-go/dao"
 	"learn-go/dto"
 	"learn-go/model"
@@ -12,9 +10,14 @@ import (
 	"time"
 )
 
-// UserService 没有数据、只有方法，所有的数据都放在DTO里
-//这里的方法从controller拿来初步处理的入参，重点是处理业务逻辑
-//所有的增删改查都交给DAO层处理，否则service层会非常庞大
+/*
+Service层没有数据结构、只有方法，所有的数据结构都放在DTO里
+入参为id、DTO，出参为response。
+这里的方法从controller拿来id或初步处理的入参dto，重点是处理业务逻辑。
+所有的增删改查都交给DAO层处理，否则service层会非常庞大。
+生成出参response后，交给controller展示。
+*/
+
 type RelatedPartyService struct {
 	baseService
 	ID                      int
@@ -35,10 +38,21 @@ func NewRelatedPartyService() RelatedPartyService {
 	return RelatedPartyService{}
 }
 
-func (RelatedPartyService) Get(id int) (data *dto.RelatedPartyDTO) {
+func (RelatedPartyService) Get(id int) *serializer.ResponseForDetail {
 	u := new(dao.RelatedPartyDAO)
-	data = u.Get(id)
-	return data
+	result := u.Get(id)
+	if result == nil {
+		return &serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorRecordNotFound,
+			Message: status.GetMessage(status.ErrorRecordNotFound),
+		}
+	}
+	return &serializer.ResponseForDetail{
+		Data:    result,
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
+	}
 }
 
 func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
@@ -83,80 +97,34 @@ func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
 	}
 }
 
-func GetDetailOfRelatedParty(id int64) (*serializer.ResponseForDetail, error) {
-	var record *model.RelatedParty
-	result := dao.DB.Debug().Where("id=?", id).First(&record)
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return &serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.ErrorRecordNotFound,
-			Message: status.GetMessage(status.ErrorRecordNotFound),
-		}, nil
-	}
-	return &serializer.ResponseForDetail{
-		Data:    record,
-		Code:    status.Success,
-		Message: status.GetMessage(status.Success),
-	}, nil
-}
-
-func (RelatedPartyService) Update(paramIn dto.RelatedPartyDTO) serializer.ResponseForDetail {
-	//对dto进行清洗，生成dao层需要的model
-	id := paramIn.ID
+func (RelatedPartyService) Update(paramIn *dto.RelatedPartyDTO) serializer.ResponseForDetail {
 	var record model.RelatedParty
-	if paramIn.ChineseName != nil && *paramIn.ChineseName != "" {
+	//对dto进行清洗，生成dao层需要的model
+	if &paramIn.ChineseName != nil {
 		record.ChineseName = paramIn.ChineseName
 	}
-	if paramIn.EnglishName != nil && *paramIn.EnglishName != "" {
+	if paramIn.EnglishName != nil {
 		record.EnglishName = paramIn.EnglishName
 	}
-	if paramIn.Address != nil && *paramIn.Address != "" {
+	if paramIn.Address != nil {
 		record.Address = paramIn.Address
 	}
-	if paramIn.UniformSocialCreditCode != nil && *paramIn.UniformSocialCreditCode != "" {
+	if paramIn.UniformSocialCreditCode != nil {
 		record.UniformSocialCreditCode = paramIn.UniformSocialCreditCode
 	}
-	if paramIn.Telephone != nil && *paramIn.Telephone != "" {
+	if paramIn.Telephone != nil {
 		record.Telephone = paramIn.Telephone
 	}
+	record.ID = paramIn.ID
 	//清洗完毕，开始update
 	r := dao.NewRelatedDAO()
-	err := r.Update(id, &record)
+	err := r.Update(&record)
+	//拿到dao层的返回结果，进行处理
 	if err != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
 			Code:    status.ErrorFailToSaveRecord,
 			Message: status.GetMessage(status.ErrorFailToSaveRecord),
-		}
-	}
-	return serializer.ResponseForDetail{
-		Data:    nil,
-		Code:    status.Success,
-		Message: status.GetMessage(status.Success),
-	}
-}
-
-func UpdateRelatedParty(paramIn RelatedPartyService) serializer.ResponseForDetail {
-	var record model.RelatedParty
-	result := dao.DB.Debug().First(&record, paramIn.ID)
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.ErrorRecordNotFound,
-			Message: status.GetMessage(status.ErrorRecordNotFound),
-		}
-	}
-	record.ChineseName = paramIn.ChineseName
-	record.EnglishName = paramIn.EnglishName
-	record.Address = paramIn.Address
-	record.UniformSocialCreditCode = paramIn.UniformSocialCreditCode
-	record.Telephone = paramIn.Telephone
-	result = dao.DB.Debug().Save(&record)
-	if result.Error != nil {
-		return serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.Error,
-			Message: status.GetMessage(status.Error),
 		}
 	}
 	return serializer.ResponseForDetail{
@@ -201,7 +169,7 @@ func (RelatedPartyService) Create(paramIn *dto.RelatedPartyDTO) serializer.Respo
 	}
 }
 
-func DeleteRelatedParty(id int64) serializer.ResponseForDetail {
+func (RelatedPartyService) Delete(id int) serializer.ResponseForDetail {
 	result := dao.DB.Debug().Delete(&model.RelatedParty{}, id)
 	if result.Error != nil {
 		return serializer.ResponseForDetail{

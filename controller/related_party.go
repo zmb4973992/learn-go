@@ -11,24 +11,29 @@ import (
 )
 
 // IRelatedPartyController 使用简单工厂模式,公开接口、公开创建结构体的方法，隐藏结构体
-type IRelatedPartyController interface {
-	Create(c *gin.Context)
-	Get(c *gin.Context)
-	Update(c *gin.Context)
-	Delete(c *gin.Context)
-	List(c *gin.Context)
-}
+//type IRelatedPartyController interface {
+//	Create(c *gin.Context)
+//	Get(c *gin.Context)
+//	Update(c *gin.Context)
+//	Delete(c *gin.Context)
+//	List(c *gin.Context)
+//}
 
-//继承baseController，获得相关方法，避免反复重写
-type relatedPartyController struct {
+/* controller层负责接收参数、校验参数,生成dto
+然后把id或dto传给service层进行业务处理
+最后拿到service层返回的结果进行展现
+*/
+
+// RelatedPartyController 继承baseController，获得相关方法，避免反复重写
+type RelatedPartyController struct {
 	baseController
 }
 
-func NewRelatedPartyController() IRelatedPartyController {
-	return relatedPartyController{}
+func NewRelatedPartyController() RelatedPartyController {
+	return RelatedPartyController{}
 }
 
-func (r relatedPartyController) Get(c *gin.Context) {
+func (RelatedPartyController) Get(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, serializer.ResponseForDetail{
@@ -40,23 +45,11 @@ func (r relatedPartyController) Get(c *gin.Context) {
 	}
 	s := service.NewRelatedPartyService()
 	res := s.Get(id)
-	if res == nil {
-		c.JSON(http.StatusOK, serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.ErrorRecordNotFound,
-			Message: status.GetMessage(status.ErrorRecordNotFound),
-		})
-		return
-	}
-	c.JSON(http.StatusOK, serializer.ResponseForDetail{
-		Data:    res,
-		Code:    status.Success,
-		Message: status.GetMessage(status.Success),
-	})
+	c.JSON(http.StatusOK, res)
 	return
 }
 
-func (relatedPartyController) Update(c *gin.Context) {
+func (RelatedPartyController) Update(c *gin.Context) {
 	var paramIn dto.RelatedPartyDTO
 	//先把json参数绑定到dto
 	err := c.ShouldBindJSON(&paramIn)
@@ -79,11 +72,11 @@ func (relatedPartyController) Update(c *gin.Context) {
 		return
 	}
 	s := service.NewRelatedPartyService()
-	res := s.Update(paramIn)
+	res := s.Update(&paramIn)
 	c.JSON(200, res)
 }
 
-func (relatedPartyController) Create(c *gin.Context) {
+func (RelatedPartyController) Create(c *gin.Context) {
 	//先声明空的dto，再把context里的数据绑到dto上
 	var r dto.RelatedPartyDTO
 	err := c.ShouldBindJSON(&r)
@@ -129,21 +122,21 @@ func newd() {
 //	return
 //}
 
-func (relatedPartyController) Delete(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusOK, serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.ErrorInvalidURIParameters,
-			Message: status.GetMessage(status.ErrorInvalidURIParameters),
-		})
-		return
-	}
-	res := service.DeleteRelatedParty(id)
-	c.JSON(http.StatusOK, res)
+func (RelatedPartyController) Delete(c *gin.Context) {
+	//id, err := strconv.Atoi(c.Param("id"))
+	//if err != nil {
+	//	c.JSON(http.StatusOK, serializer.ResponseForDetail{
+	//		Data:    nil,
+	//		Code:    status.ErrorInvalidURIParameters,
+	//		Message: status.GetMessage(status.ErrorInvalidURIParameters),
+	//	})
+	//	return
+	//}
+	//res := service.DeleteRelatedParty(id)
+	//c.JSON(http.StatusOK, res)
 }
 
-func (relatedPartyController) List(c *gin.Context) {
+func (RelatedPartyController) List(c *gin.Context) {
 	var s service.RelatedPartyService
 	c.ShouldBind(&s)
 	//var response serializer.ResponseForList

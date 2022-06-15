@@ -6,7 +6,7 @@ import (
 
 type RelatedParty struct {
 	ID                      int
-	ChineseName             *string //中文名称
+	ChineseName             *string `gorm:"default:null"` //中文名称
 	EnglishName             *string //英文名称
 	Address                 *string //地址
 	UniformSocialCreditCode *string //统一社会信用代码
@@ -21,3 +21,10 @@ type RelatedParty struct {
 func (RelatedParty) TableName() string {
 	return "related_party"
 }
+
+//func (u *RelatedParty) BeforeUpdate(db *gorm.DB) (err error) {
+//	if u.ChineseName != nil && *u.ChineseName == "" {
+//		u.ChineseName = nil
+//	}
+//	return nil
+//}

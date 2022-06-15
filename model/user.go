@@ -3,11 +3,12 @@ package model
 import "time"
 
 type User struct {
-	ID        int       `json:"id"`
-	CreatedAt time.Time `json:"-"`
-	UpdatedAt time.Time `json:"-"`
+	ID        int `json:"id"`
 	Username  string
 	Password  string
+	CreatedAt time.Time     `json:"-"`
+	UpdatedAt time.Time     `json:"-"`
+	Role      []RoleAndUser `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 // TableName 将表名改为user
