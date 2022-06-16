@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"gorm.io/gorm"
 	"learn-go/dao"
 	"learn-go/dto"
@@ -98,7 +97,7 @@ func (UserService) Delete(id int) serializer.ResponseForDetail {
 	}
 }
 
-func (UserService) List(paramIn dto.UserListDTO) serializer.ResponseForDetail {
+func (UserService) List(paramIn dto.UserListDTO) serializer.ResponseForList {
 	//生成sql查询条件
 	sqlCondition := util.NewSqlCondition()
 	//对paramIn进行清洗
@@ -153,13 +152,25 @@ func (UserService) List(paramIn dto.UserListDTO) serializer.ResponseForDetail {
 	} else {
 		sqlCondition.OrderBy.Desc = false
 	}
-	fmt.Println(sqlCondition.Paging.Page)
-	fmt.Println(sqlCondition.Paging.PageSize)
 	//新建一个dao.User结构体的实例
 	u := new(dao.UserDAO)
-	list := u.List(*sqlCondition)
-	return serializer.ResponseForDetail{
-		Data:    list,
+	list, totalPages, totalRecords := u.List(*sqlCondition)
+	if list == nil {
+		return serializer.ResponseForList{
+			Data:    nil,
+			Paging:  nil,
+			Code:    status.ErrorRecordNotFound,
+			Message: status.GetMessage(status.ErrorRecordNotFound),
+		}
+	}
+	return serializer.ResponseForList{
+		Data: list,
+		Paging: &dto.PagingDTO{
+			Page:         page,
+			PageSize:     pageSize,
+			TotalPages:   totalPages,
+			TotalRecords: totalRecords,
+		},
 		Code:    status.Success,
 		Message: status.GetMessage(status.Success),
 	}

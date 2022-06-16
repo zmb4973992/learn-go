@@ -5,12 +5,22 @@ package dto
 //这里必须是指针类型，因为只有指针才能向前端传递nil
 //以后如果接收和推送用不同的dto，可以考虑不用指针
 type RelatedPartyDTO struct {
-	ID                      int       `form:"id" json:"id"`
-	ChineseName             *string   `json:"chinese_name"`
-	EnglishName             *string   `json:"english_name"`
-	Address                 *string   `json:"address"`
-	UniformSocialCreditCode *string   `json:"uniform_social_credit_code"` //统一社会信用代码
-	Telephone               *string   `json:"telephone"`
-	File                    *string   `json:"-"`
-	Files                   *[]string `json:"-"`
+	ID                      int     `form:"id" json:"id"`
+	ChineseName             *string `json:"chinese_name"`
+	EnglishName             *string `json:"english_name"`
+	Address                 *string `json:"address"`
+	UniformSocialCreditCode *string `json:"uniform_social_credit_code"` //统一社会信用代码
+	Telephone               *string `json:"telephone"`
+}
+
+type RelatedPartyListDTO struct {
+	ID    int  `form:"id"`
+	IDGte *int `form:"id_gte" binding:"omitempty"`
+	IDLte *int `form:"id_lte"`
+
+	ChineseName        *string `json:"chinese_name"`
+	ChineseNameInclude *string `json:"chinese_name_include"`
+
+	Paging  *PagingDTO
+	OrderBy *OrderByDTO
 }

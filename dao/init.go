@@ -39,3 +39,14 @@ func Init() {
 		panic(err)
 	}
 }
+
+func GetTotalPages(totalRecords int, pageSize int) (totalPages int) {
+	if totalRecords <= 0 || pageSize <= 0 {
+		return 0
+	}
+	totalPages = totalRecords / pageSize
+	if totalRecords%pageSize != 0 {
+		totalPages++
+	}
+	return totalPages
+}

@@ -40,7 +40,8 @@ func (UserDAO) Delete(id int) error {
 }
 
 // List 入参为sql查询条件，结果为数据列表+分页情况
-func (UserDAO) List(sqlCondition util.SqlCondition) (list []dto.UserDTO) {
+func (UserDAO) List(sqlCondition util.SqlCondition) (
+	list []dto.UserDTO, totalPages int, totalRecords int) {
 	db := DB
 	//select
 	if len(sqlCondition.SelectedColumns) > 0 {
@@ -58,15 +59,25 @@ func (UserDAO) List(sqlCondition util.SqlCondition) (list []dto.UserDTO) {
 			db = db.Order(sqlCondition.OrderBy.OrderByColumn)
 		}
 	}
+	//count 计算totalRecords
+	var tempTotalRecords int64
+	err := db.Debug().Model(&model.User{}).Count(&tempTotalRecords).Error
+	if err != nil {
+		return nil, 0, 0
+	}
+	totalRecords = int(tempTotalRecords)
 
 	//limit
 	db = db.Limit(sqlCondition.Paging.PageSize)
-
 	//offset
 	offset := (sqlCondition.Paging.Page - 1) * sqlCondition.Paging.PageSize
 	db = db.Offset(offset)
 
-	db.Model(&model.User{}).Debug().Find(&list)
-
-	return list
+	//count 计算totalPages
+	totalPages = GetTotalPages(totalRecords, sqlCondition.Paging.PageSize)
+	err = db.Model(&model.User{}).Debug().Find(&list).Error
+	if err != nil {
+		return nil, 0, 0
+	}
+	return list, totalPages, totalRecords
 }

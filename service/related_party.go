@@ -1,11 +1,11 @@
 package service
 
 import (
-	"fmt"
 	"learn-go/dao"
 	"learn-go/dto"
 	"learn-go/model"
 	"learn-go/serializer"
+	"learn-go/util"
 	"learn-go/util/status"
 	"time"
 )
@@ -55,31 +55,56 @@ func (RelatedPartyService) Get(id int) *serializer.ResponseForDetail {
 	}
 }
 
-func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
-	if s.Paging.Page <= 0 {
-		s.Paging.Page = 1
+func (RelatedPartyService) List(paramIn dto.RelatedPartyListDTO) serializer.ResponseForList {
+	//生成sql查询条件
+	sqlCondition := util.NewSqlCondition()
+	//对paramIn进行清洗
+	//这部分是用于where的参数
+	page := paramIn.Paging.Page
+	if page > 0 {
+		sqlCondition.Paging.Page = page
 	}
-	if s.Paging.PageSize <= 0 || s.Paging.PageSize > 100 {
-		s.Paging.PageSize = 20
+	//如果参数里的pageSize是整数且大于0、小于等于100：
+	pageSize := paramIn.Paging.PageSize
+	if pageSize > 0 && pageSize <= 100 {
+		sqlCondition.Paging.PageSize = pageSize
 	}
-	var list []RelatedPartyService
-	res := dao.DB.Debug().Scopes(dto.PaginateBy(s.Paging)).
-		Model(&model.RelatedParty{}).
-		Where("chinese_name=?", s.ChineseName).
-		Find(&list)
-	var temp int64
-	dao.DB.Debug().
-		Model(&model.RelatedParty{}).
-		Where("chinese_name=?", s.ChineseName).Count(&temp)
-	if res.Error != nil {
-		return serializer.ResponseForList{
-			Data:    nil,
-			Paging:  nil,
-			Code:    status.Error,
-			Message: status.GetMessage(status.Error),
-		}
+	id := paramIn.ID
+	if id > 0 {
+		sqlCondition.Where("id", id)
 	}
-	if res.RowsAffected == 0 {
+	idGte := paramIn.IDGte
+	if idGte != nil && *idGte >= 0 {
+		sqlCondition.Gte("id", *idGte)
+	}
+	idLte := paramIn.IDLte
+	if idLte != nil && *idLte >= 0 {
+		sqlCondition.Lte("id", *idLte)
+	}
+	chineseName := paramIn.ChineseName
+	if chineseName != nil && *chineseName != "" {
+		sqlCondition = sqlCondition.Where("chinese_name = ?", *chineseName)
+	}
+	chineseNameInclude := paramIn.ChineseNameInclude
+	if chineseNameInclude != nil && *chineseNameInclude != "" {
+		sqlCondition = sqlCondition.Include("chinese_name", *chineseNameInclude)
+	}
+
+	//这部分是用于order的参数
+	column := paramIn.OrderBy.OrderByColumn
+	if column != "" {
+		sqlCondition.OrderBy.OrderByColumn = column
+	}
+	desc := paramIn.OrderBy.Desc
+	if desc == true {
+		sqlCondition.OrderBy.Desc = true
+	} else {
+		sqlCondition.OrderBy.Desc = false
+	}
+	//新建一个dao.User结构体的实例
+	u := new(dao.RelatedPartyDAO)
+	list, totalPages, totalRecords := u.List(*sqlCondition)
+	if list == nil {
 		return serializer.ResponseForList{
 			Data:    nil,
 			Paging:  nil,
@@ -87,38 +112,26 @@ func GetRelatedPartyList(s RelatedPartyService) serializer.ResponseForList {
 			Message: status.GetMessage(status.ErrorRecordNotFound),
 		}
 	}
-	fmt.Println(res.RowsAffected)
-	fmt.Println(temp)
 	return serializer.ResponseForList{
-		Data:    list,
-		Paging:  nil,
+		Data: list,
+		Paging: &dto.PagingDTO{
+			Page:         page,
+			PageSize:     pageSize,
+			TotalPages:   totalPages,
+			TotalRecords: totalRecords,
+		},
 		Code:    status.Success,
 		Message: status.GetMessage(status.Success),
 	}
 }
 
-func (RelatedPartyService) Update(paramIn *dto.RelatedPartyDTO) serializer.ResponseForDetail {
-	var record model.RelatedParty
-	//对dto进行清洗，生成dao层需要的model
-	if &paramIn.ChineseName != nil {
-		record.ChineseName = paramIn.ChineseName
-	}
-	if paramIn.EnglishName != nil {
-		record.EnglishName = paramIn.EnglishName
-	}
-	if paramIn.Address != nil {
-		record.Address = paramIn.Address
-	}
-	if paramIn.UniformSocialCreditCode != nil {
-		record.UniformSocialCreditCode = paramIn.UniformSocialCreditCode
-	}
-	if paramIn.Telephone != nil {
-		record.Telephone = paramIn.Telephone
-	}
-	record.ID = paramIn.ID
+func (RelatedPartyService) Update(paramIn *model.RelatedParty) serializer.ResponseForDetail {
+	//var record model.RelatedParty
+	//对model进行清洗，生成dao层需要的model
+
 	//清洗完毕，开始update
 	r := dao.NewRelatedDAO()
-	err := r.Update(&record)
+	err := r.Update(paramIn)
 	//拿到dao层的返回结果，进行处理
 	if err != nil {
 		return serializer.ResponseForDetail{
@@ -134,27 +147,12 @@ func (RelatedPartyService) Update(paramIn *dto.RelatedPartyDTO) serializer.Respo
 	}
 }
 
-func (RelatedPartyService) Create(paramIn *dto.RelatedPartyDTO) serializer.ResponseForDetail {
-	//对dto进行清洗，生成dao层需要的model
-	var record model.RelatedParty
-	if paramIn.ChineseName != nil && *paramIn.ChineseName != "" {
-		record.ChineseName = paramIn.ChineseName
-	}
-	if paramIn.EnglishName != nil && *paramIn.EnglishName != "" {
-		record.EnglishName = paramIn.EnglishName
-	}
-	if paramIn.Address != nil && *paramIn.Address != "" {
-		record.Address = paramIn.Address
-	}
-	if paramIn.UniformSocialCreditCode != nil && *paramIn.UniformSocialCreditCode != "" {
-		record.UniformSocialCreditCode = paramIn.UniformSocialCreditCode
-	}
-	if paramIn.Telephone != nil && *paramIn.Telephone != "" {
-		record.Telephone = paramIn.Telephone
-	}
+func (RelatedPartyService) Create(paramIn *model.RelatedParty) serializer.ResponseForDetail {
+	//对model进行清洗，生成dao层需要的model
+
 	//清洗完毕，开始create
 	r := dao.NewRelatedDAO()
-	err := r.Create(&record)
+	err := r.Create(paramIn)
 	if err != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
@@ -170,8 +168,9 @@ func (RelatedPartyService) Create(paramIn *dto.RelatedPartyDTO) serializer.Respo
 }
 
 func (RelatedPartyService) Delete(id int) serializer.ResponseForDetail {
-	result := dao.DB.Debug().Delete(&model.RelatedParty{}, id)
-	if result.Error != nil {
+	r := dao.NewRelatedDAO()
+	err := r.Delete(id)
+	if err != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
 			Code:    status.ErrorFailToDeleteRecord,

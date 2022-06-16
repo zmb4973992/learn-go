@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"learn-go/dto"
+	"learn-go/model"
 	"learn-go/serializer"
 	"learn-go/service"
 	"learn-go/util/status"
@@ -19,8 +20,9 @@ import (
 //	List(c *gin.Context)
 //}
 
-/* controller层负责接收参数、校验参数,生成dto
-然后把id或dto传给service层进行业务处理
+/* controller层负责接收参数、校验参数
+增、改：用model接收    查、删：用id接收     列表：用dto接收，因为有model没有的字段
+然后把id或model传给service层进行业务处理
 最后拿到service层返回的结果进行展现
 */
 
@@ -50,8 +52,8 @@ func (RelatedPartyController) Get(c *gin.Context) {
 }
 
 func (RelatedPartyController) Update(c *gin.Context) {
-	var paramIn dto.RelatedPartyDTO
-	//先把json参数绑定到dto
+	var paramIn model.RelatedParty
+	//先把json参数绑定到model
 	err := c.ShouldBindJSON(&paramIn)
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{
@@ -77,9 +79,9 @@ func (RelatedPartyController) Update(c *gin.Context) {
 }
 
 func (RelatedPartyController) Create(c *gin.Context) {
-	//先声明空的dto，再把context里的数据绑到dto上
-	var r dto.RelatedPartyDTO
-	err := c.ShouldBindJSON(&r)
+	var paramIn model.RelatedParty
+	//先把json参数绑定到model
+	err := c.ShouldBindJSON(&paramIn)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, serializer.ResponseForDetail{
 			Data:    nil,
@@ -89,13 +91,9 @@ func (RelatedPartyController) Create(c *gin.Context) {
 		return
 	}
 	s := service.NewRelatedPartyService()
-	res := s.Create(&r)
+	res := s.Create(&paramIn)
 	c.JSON(http.StatusOK, res)
 	return
-}
-
-func newd() {
-
 }
 
 //多文件上传
@@ -123,23 +121,35 @@ func newd() {
 //}
 
 func (RelatedPartyController) Delete(c *gin.Context) {
-	//id, err := strconv.Atoi(c.Param("id"))
-	//if err != nil {
-	//	c.JSON(http.StatusOK, serializer.ResponseForDetail{
-	//		Data:    nil,
-	//		Code:    status.ErrorInvalidURIParameters,
-	//		Message: status.GetMessage(status.ErrorInvalidURIParameters),
-	//	})
-	//	return
-	//}
-	//res := service.DeleteRelatedParty(id)
-	//c.JSON(http.StatusOK, res)
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusOK, serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorInvalidURIParameters,
+			Message: status.GetMessage(status.ErrorInvalidURIParameters),
+		})
+		return
+	}
+	s := service.NewRelatedPartyService()
+	response := s.Delete(id)
+	c.JSON(http.StatusOK, response)
 }
 
 func (RelatedPartyController) List(c *gin.Context) {
-	var s service.RelatedPartyService
-	c.ShouldBind(&s)
-	//var response serializer.ResponseForList
-	response := service.GetRelatedPartyList(s)
+	var relatedPartyListDTO dto.RelatedPartyListDTO
+	//这里是bindQuery，只接收query参数
+	err := c.ShouldBindQuery(&relatedPartyListDTO)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, serializer.ResponseForList{
+			Data:    nil,
+			Paging:  nil,
+			Code:    status.ErrorInvalidQueryParameters,
+			Message: status.GetMessage(status.ErrorInvalidQueryParameters),
+		})
+		return
+	}
+	//生成userService,然后调用它的方法
+	s := new(service.RelatedPartyService)
+	response := s.List(relatedPartyListDTO)
 	c.JSON(http.StatusOK, response)
 }

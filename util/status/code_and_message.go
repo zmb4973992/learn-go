@@ -15,11 +15,13 @@ const (
 	ErrorInvalidFormDataParameters int = 1004
 	// ErrorInvalidJsonParameters json参数无效
 	ErrorInvalidJsonParameters int = 1005
+	// ErrorInvalidQueryParameters query参数无效
+	ErrorInvalidQueryParameters int = 1006
 	// ErrorFailToSaveRecord 保存记录失败，请重试
-	ErrorFailToSaveRecord int = 1006
+	ErrorFailToSaveRecord int = 1010
 	// ErrorFailToDeleteRecord 删除记录失败，请重试
-	ErrorFailToDeleteRecord int = 1007
-	ErrorFileTooLarge       int = 1008
+	ErrorFailToDeleteRecord int = 1011
+	ErrorFileTooLarge       int = 1012
 
 	ErrorInvalidUsernameOrPassword int = 2001
 	ErrorUsernameExist             int = 2002
@@ -41,7 +43,8 @@ var Message = map[int]string{
 	ErrorNotEnoughParameters:       "没有足够的参数",
 	ErrorInvalidURIParameters:      "URI参数无效",
 	ErrorInvalidFormDataParameters: "form-data参数无效",
-	ErrorInvalidJsonParameters:     "json参数无效",
+	ErrorInvalidJsonParameters:     "json参数缺失或json参数无效",
+	ErrorInvalidQueryParameters:    "query参数无效",
 	ErrorFailToSaveRecord:          "保存记录失败",
 	ErrorFailToDeleteRecord:        "删除记录失败",
 	ErrorFileTooLarge:              "文件过大",

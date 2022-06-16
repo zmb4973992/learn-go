@@ -4,9 +4,14 @@ import (
 	"gorm.io/gorm"
 )
 
+// PagingDTO 处理分页相关的数据
+//只接收form(query)形式的page和pageSize
+//发送时通过json全部发送
 type PagingDTO struct {
-	Page     int `form:"page"`
-	PageSize int `form:"page_size"`
+	Page         int `form:"page"      json:"page"`
+	PageSize     int `form:"page_size" json:"page_size"`
+	TotalPages   int `form:"-"         json:"total_pages"`
+	TotalRecords int `form:"-"         json:"total_records"`
 }
 
 type OrderByDTO struct {
@@ -37,16 +42,4 @@ func PaginateBy(rule PagingDTO) func(db *gorm.DB) *gorm.DB {
 		offset := (rule.Page - 1) * rule.PageSize
 		return db.Offset(offset).Limit(rule.PageSize)
 	}
-}
-
-// GetTotalPage 使用前请确保两个参数均大于0，否则结果会返回0。拟废除，不要再用了
-func GetTotalPage(totalNumberOfRecord int, pageSize int) (totalPage int) {
-	if totalNumberOfRecord <= 0 || pageSize <= 0 {
-		return 0
-	}
-	totalPage = totalNumberOfRecord / pageSize
-	if totalNumberOfRecord%pageSize != 0 {
-		totalPage++
-	}
-	return
 }

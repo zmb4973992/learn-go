@@ -112,15 +112,20 @@ func (userController) Delete(c *gin.Context) {
 }
 
 func (userController) List(c *gin.Context) {
-	var userSearchDTO dto.UserListDTO
-	err := c.ShouldBindQuery(&userSearchDTO)
+	var userListDTO dto.UserListDTO
+	err := c.ShouldBindQuery(&userListDTO)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"err": err,
+		c.JSON(http.StatusBadRequest, serializer.ResponseForList{
+			Data:    nil,
+			Paging:  nil,
+			Code:    status.ErrorInvalidQueryParameters,
+			Message: status.GetMessage(status.ErrorInvalidQueryParameters),
 		})
+		return
 	}
 	//生成userService,然后调用它的方法
 	s := new(service.UserService)
-	response := s.List(userSearchDTO)
+	response := s.List(userListDTO)
 	c.JSON(http.StatusOK, response)
+	return
 }

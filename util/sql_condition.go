@@ -38,7 +38,7 @@ func (s *SqlCondition) Where(key string, value any) *SqlCondition {
 }
 
 func (s *SqlCondition) Equal(paramKey string, paramValue any) *SqlCondition {
-	s.Where(paramKey+" = ? ", paramValue)
+	s.Where(paramKey+" = ?", paramValue)
 	return s
 }
 
@@ -126,9 +126,9 @@ func (s *SqlCondition) In(paramKey string, paramValue string) *SqlCondition {
 func (s *SqlCondition) Build(db *gorm.DB) *gorm.DB {
 	//处理顺序：select → where → order → limit → offset
 	//select
-	if len(s.SelectedColumns) > 0 {
-		db = db.Select(s.SelectedColumns)
-	}
+	//if len(s.SelectedColumns) > 0 {
+	//	db = db.Select(s.SelectedColumns)
+	//}
 	//where
 	if len(s.ParamPairs) > 0 {
 		for _, parameterPair := range s.ParamPairs {
