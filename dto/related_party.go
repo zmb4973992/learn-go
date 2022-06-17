@@ -1,5 +1,7 @@
 package dto
 
+import "github.com/go-playground/validator/v10"
+
 //RelatedPartyDTO dto只接收、发送数据，并不会对数据库进行任何操作
 //所有操作数据库的工作会经过dao层的清洗后都交给model来完成
 //这里必须是指针类型，因为只有指针才能向前端传递nil
@@ -13,14 +15,24 @@ type RelatedPartyDTO struct {
 	Telephone               *string `json:"telephone"`
 }
 
+// RelatedPartyListDTO 是list查询的过滤器
+// 这里不用指针，如果前端没传字段或者只传字段没传值，那么该字段默认为空
+// 在dto传递给sqlCondition时，空值会被忽略
+// 用string来接收所有数据，然后再转成int、bool分别处理，这样就能处理“只传字段没传值”的问题
 type RelatedPartyListDTO struct {
-	ID    int  `form:"id"`
-	IDGte *int `form:"id_gte" binding:"omitempty"`
-	IDLte *int `form:"id_lte"`
+	ID    int    `form:"id"`
+	IDGte string `form:"id_gte"`
+	IDLte int    `form:"id_lte"`
 
-	ChineseName        *string `json:"chinese_name"`
-	ChineseNameInclude *string `json:"chinese_name_include"`
+	ChineseName string `json:"chinese_name"`
+	//ChineseNameInclude *string `json:"chinese_name_include"`
 
-	Paging  *PagingDTO
-	OrderBy *OrderByDTO
+	Paging  PagingDTO
+	OrderBy OrderByDTO
+}
+
+func notEmpty(field validator.FieldLevel) {
+	if field.Field().String() == "" {
+
+	}
 }

@@ -7,6 +7,7 @@ import (
 	"learn-go/serializer"
 	"learn-go/util"
 	"learn-go/util/status"
+	"strconv"
 	"time"
 )
 
@@ -60,35 +61,32 @@ func (RelatedPartyService) List(paramIn dto.RelatedPartyListDTO) serializer.Resp
 	sqlCondition := util.NewSqlCondition()
 	//对paramIn进行清洗
 	//这部分是用于where的参数
-	page := paramIn.Paging.Page
-	if page > 0 {
-		sqlCondition.Paging.Page = page
+	if paramIn.Paging.Page > 0 {
+		sqlCondition.Paging.Page = paramIn.Paging.Page
 	}
 	//如果参数里的pageSize是整数且大于0、小于等于100：
-	pageSize := paramIn.Paging.PageSize
-	if pageSize > 0 && pageSize <= 100 {
-		sqlCondition.Paging.PageSize = pageSize
+	if paramIn.Paging.PageSize > 0 && paramIn.Paging.PageSize <= 100 {
+		sqlCondition.Paging.PageSize = paramIn.Paging.PageSize
 	}
 	id := paramIn.ID
 	if id > 0 {
 		sqlCondition.Where("id", id)
 	}
-	idGte := paramIn.IDGte
-	if idGte != nil && *idGte >= 0 {
-		sqlCondition.Gte("id", *idGte)
+	idGte, err := strconv.Atoi(paramIn.IDGte)
+	if err == nil {
+		sqlCondition.Gte("id", idGte)
 	}
-	idLte := paramIn.IDLte
-	if idLte != nil && *idLte >= 0 {
-		sqlCondition.Lte("id", *idLte)
+	//idLte := paramIn.IDLte
+	//if idLte != nil && *idLte >= 0 {
+	//	sqlCondition.Lte("id", *idLte)
+	//}
+	if paramIn.ChineseName != "" {
+		sqlCondition = sqlCondition.Where("chinese_name = ?", paramIn.ChineseName)
 	}
-	chineseName := paramIn.ChineseName
-	if chineseName != nil && *chineseName != "" {
-		sqlCondition = sqlCondition.Where("chinese_name = ?", *chineseName)
-	}
-	chineseNameInclude := paramIn.ChineseNameInclude
-	if chineseNameInclude != nil && *chineseNameInclude != "" {
-		sqlCondition = sqlCondition.Include("chinese_name", *chineseNameInclude)
-	}
+	//chineseNameInclude := paramIn.ChineseNameInclude
+	//if chineseNameInclude != nil && *chineseNameInclude != "" {
+	//	sqlCondition = sqlCondition.Include("chinese_name", *chineseNameInclude)
+	//}
 
 	//这部分是用于order的参数
 	column := paramIn.OrderBy.OrderByColumn
@@ -115,8 +113,8 @@ func (RelatedPartyService) List(paramIn dto.RelatedPartyListDTO) serializer.Resp
 	return serializer.ResponseForList{
 		Data: list,
 		Paging: &dto.PagingDTO{
-			Page:         page,
-			PageSize:     pageSize,
+			Page:         sqlCondition.Paging.Page,
+			PageSize:     sqlCondition.Paging.PageSize,
 			TotalPages:   totalPages,
 			TotalRecords: totalRecords,
 		},
