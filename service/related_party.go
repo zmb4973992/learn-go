@@ -68,28 +68,26 @@ func (RelatedPartyService) List(paramIn dto.RelatedPartyListDTO) serializer.Resp
 	if paramIn.Paging.PageSize > 0 && paramIn.Paging.PageSize <= 100 {
 		sqlCondition.Paging.PageSize = paramIn.Paging.PageSize
 	}
-	id := paramIn.ID
-	if id > 0 {
-		sqlCondition.Where("id", id)
+	if id := paramIn.ID; id > 0 {
+		sqlCondition.Equal("id", id)
 	}
-	idGte, err := strconv.Atoi(paramIn.IDGte)
-	if err == nil {
+	if idGte, err := strconv.Atoi(paramIn.IDGte); err == nil {
 		sqlCondition.Gte("id", idGte)
 	}
-	//idLte := paramIn.IDLte
-	//if idLte != nil && *idLte >= 0 {
-	//	sqlCondition.Lte("id", *idLte)
-	//}
-	if paramIn.ChineseName != "" {
-		sqlCondition = sqlCondition.Where("chinese_name = ?", paramIn.ChineseName)
+	if idLte, err := strconv.Atoi(paramIn.IDLte); err == nil {
+		sqlCondition.Lte("id", idLte)
 	}
-	//chineseNameInclude := paramIn.ChineseNameInclude
-	//if chineseNameInclude != nil && *chineseNameInclude != "" {
-	//	sqlCondition = sqlCondition.Include("chinese_name", *chineseNameInclude)
-	//}
+	if paramIn.ChineseName != "" {
+		sqlCondition = sqlCondition.Equal("chinese_name", paramIn.ChineseName)
+	}
+	if paramIn.ChineseNameInclude != "" {
+		sqlCondition = sqlCondition.Include("chinese_name", paramIn.ChineseNameInclude)
+	}
 
 	//这部分是用于order的参数
 	column := paramIn.OrderBy.OrderByColumn
+	//allColumns := []string{"id", "telephone", "file"}
+	//re := util.IsInSlice(column, allColumns)
 	if column != "" {
 		sqlCondition.OrderBy.OrderByColumn = column
 	}

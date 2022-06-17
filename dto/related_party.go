@@ -22,10 +22,10 @@ type RelatedPartyDTO struct {
 type RelatedPartyListDTO struct {
 	ID    int    `form:"id"`
 	IDGte string `form:"id_gte"`
-	IDLte int    `form:"id_lte"`
+	IDLte string `form:"id_lte"`
 
-	ChineseName string `json:"chinese_name"`
-	//ChineseNameInclude *string `json:"chinese_name_include"`
+	ChineseName        string `form:"chinese_name"`
+	ChineseNameInclude string `form:"chinese_name_include"`
 
 	Paging  PagingDTO
 	OrderBy OrderByDTO

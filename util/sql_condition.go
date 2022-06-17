@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"gorm.io/gorm"
 	"learn-go/dto"
 )
@@ -29,6 +30,7 @@ func NewSqlCondition() *SqlCondition {
 }
 
 // Where 给SqlCondition自定义where方法，将参数保存到ParameterPair中
+// 建议不要直接用，如果是“等于赋值”，可以用equal
 func (s *SqlCondition) Where(key string, value any) *SqlCondition {
 	s.ParamPairs = append(s.ParamPairs, ParamPair{
 		ParamKey:   key,
@@ -176,4 +178,14 @@ func (s *SqlCondition) Count(db *gorm.DB, model any) int {
 		return 0
 	}
 	return int(count)
+}
+
+func IsInSlice(str string, strSlice []string) bool {
+	for i := 0; i < len(strSlice); i++ {
+		fmt.Println(i)
+		if str == strSlice[i] {
+			return true
+		}
+	}
+	return false
 }
