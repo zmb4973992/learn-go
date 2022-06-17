@@ -11,7 +11,7 @@ import (
 
 func JWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.Request.Header.Get("access_token")
+		token := c.GetHeader("access_token")
 		//如果请求头没有携带access_token
 		if token == "" {
 			c.JSON(http.StatusOK, serializer.ResponseForDetail{
