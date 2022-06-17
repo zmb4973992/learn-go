@@ -69,11 +69,17 @@ func (RelatedPartyDAO) List(sqlCondition util.SqlCondition) (
 		db = db.Where(paramPair.ParamKey, paramPair.ParamValue)
 	}
 	//orderBy
-	if sqlCondition.OrderBy.OrderByColumn != "" {
-		if sqlCondition.OrderBy.Desc == true {
-			db = db.Order(sqlCondition.OrderBy.OrderByColumn + " desc")
-		} else {
-			db = db.Order(sqlCondition.OrderBy.OrderByColumn)
+	orderBy := sqlCondition.OrderBy.OrderByColumn
+	if orderBy != "" {
+		var columns []string
+		db.Raw("Select Name FROM SysColumns Where id=Object_Id('related_party')").
+			Find(&columns)
+		if ok := util.IsInSlice(orderBy, columns); ok {
+			if sqlCondition.OrderBy.Desc == true {
+				db = db.Order(sqlCondition.OrderBy.OrderByColumn + " desc")
+			} else {
+				db = db.Order(sqlCondition.OrderBy.OrderByColumn)
+			}
 		}
 	}
 	//count 计算totalRecords

@@ -138,6 +138,9 @@ func (s *SqlCondition) Build(db *gorm.DB) *gorm.DB {
 		}
 	}
 	//order
+	var name []string
+	db.Raw("Select Name FROM SysColumns Where id=Object_Id('related_party')").Find(&name)
+	fmt.Print("666666666666666")
 	if s.OrderBy.OrderByColumn != "" {
 		if s.OrderBy.Desc == true {
 			db = db.Order(s.OrderBy.OrderByColumn + " desc")
