@@ -32,7 +32,7 @@ func (s UserLoginService) Login() serializer.ResponseForDetail {
 		return response
 	}
 	//账号密码都正确时，生成token
-	token := jwt.GenerateToken(user.Username)
+	token := jwt.GenerateToken(user.ID)
 	return serializer.ResponseForDetail{
 		Data: gin.H{
 			"access_token": token,

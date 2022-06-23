@@ -4,6 +4,7 @@ import (
 	"learn-go/config"
 	"learn-go/dao"
 	"learn-go/router"
+	"learn-go/util"
 	"learn-go/util/casbin"
 	"learn-go/util/logger"
 	"learn-go/util/snowflake"
@@ -20,6 +21,8 @@ func main() {
 	snowflake.Init()
 	//初始化casbin，用于权限控制
 	casbin.Init()
+	//创建保存上传文件的文件夹
+	util.UploadInit()
 	//开始采用自定义的方式生成引擎
 	engine := router.Init()
 	err := engine.Run(":" + config.GlobalConfig.HttpPort)

@@ -92,6 +92,7 @@ func loadConfig() {
 	GlobalConfig.logConfig.MaxAge = v.GetInt("log.LogMaxAge")
 	GlobalConfig.logConfig.Compress = v.GetBool("log.LogCompress")
 
-	GlobalConfig.uploadConfig.FullPath = v.GetString("upload_files.FullPath")
-	GlobalConfig.uploadConfig.MaxSizeForUpload = v.GetInt64("upload_files.MaxSizeForLog")
+	GlobalConfig.uploadConfig.FullPath = v.GetString("upload_files.FullPath") + "/"
+	GlobalConfig.uploadConfig.MaxSizeForUpload = v.GetInt64("upload_files.MaxSize") << 20
+	fmt.Println(GlobalConfig.uploadConfig.MaxSizeForUpload)
 }

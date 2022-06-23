@@ -34,7 +34,7 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 		//如果access_token校验通过
-		c.Set("username", res.Username)
+		c.Set("UserID", res.UserID)
 		c.Next()
 		return
 		//这里只是用作测试jwt能否正常返回值，生产环境下只设置authorization、修改context、不返回任何信息，否则会对后续环节造成干扰

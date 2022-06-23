@@ -21,7 +21,9 @@ func Init() *gin.Engine {
 	relatedPartyController := controller.NewRelatedPartyController()
 	noRouteController := controller.NewNoRouteController()
 
-	engine.POST("/api/user", userController.Create) //添加用户
+	engine.POST("/api/user", userController.Create)          //添加用户
+	engine.POST("/upload", controller.Upload)                //测试上传单个
+	engine.POST("/uploadmultiple", controller.UploadMutiple) //测试上传多个
 	//依次加载所有的路由组，以下都需要经过jwt验证
 	api := engine.Group("/api").Use(middleware.JWT())
 	{

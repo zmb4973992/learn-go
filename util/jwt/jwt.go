@@ -7,15 +7,15 @@ import (
 )
 
 type myClaim struct {
-	Username string
+	UserID int
 	jwt.StandardClaims
 }
 
 // GenerateToken 传入Username，返回token字符串
-func GenerateToken(username string) string {
+func GenerateToken(userID int) string {
 	days := time.Duration(config.GlobalConfig.ValidityPeriod)
 	claim := myClaim{
-		username,
+		userID,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 24 * days).Unix(),
 		}}
