@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"learn-go/serializer"
 	"learn-go/util/jwt"
@@ -23,7 +24,9 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 		//开始校验access_token
+
 		res, err := jwt.ParseToken(token)
+		fmt.Println(err)
 		if err != nil || res.ExpiresAt < time.Now().Unix() {
 			c.JSON(http.StatusOK, serializer.ResponseForDetail{
 				Data:    nil,

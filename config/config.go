@@ -83,7 +83,7 @@ func loadConfig() {
 
 	//配置里的密钥是string类型，jwt要求为[]byte类型，必须转换后才能使用
 	GlobalConfig.jwtConfig.SecretKey = []byte(v.GetString("jwt.SecretKey"))
-	GlobalConfig.jwtConfig.ValidityPeriod = viper.GetInt("jwt.ValidityPeriod")
+	GlobalConfig.jwtConfig.ValidityPeriod = v.GetInt("jwt.ValidityPeriod")
 
 	GlobalConfig.logConfig.Path = v.GetString("log.LogPath")
 	GlobalConfig.logConfig.FileName = v.GetString("log.LogPath") + "/status.log"
@@ -94,5 +94,4 @@ func loadConfig() {
 
 	GlobalConfig.uploadConfig.FullPath = v.GetString("upload_files.FullPath") + "/"
 	GlobalConfig.uploadConfig.MaxSizeForUpload = v.GetInt64("upload_files.MaxSize") << 20
-	fmt.Println(GlobalConfig.uploadConfig.MaxSizeForUpload)
 }

@@ -40,9 +40,9 @@ func (RelatedPartyDAO) Create(paramIn *model.RelatedParty) error {
 }
 
 // Update 这里是只负责修改，不写任何业务逻辑。
-// 修改数据库记录，返回错误
+// 全量更新，保存数据库记录，返回错误
 func (RelatedPartyDAO) Update(paramIn *model.RelatedParty) error {
-	err = DB.Debug().Model(paramIn).Updates(paramIn).Error
+	err = DB.Debug().Model(paramIn).Omit("created_at").Save(paramIn).Error
 	return err
 }
 

@@ -20,7 +20,6 @@ func GenerateToken(userID int) string {
 			ExpiresAt: time.Now().Add(time.Hour * 24 * days).Unix(),
 		}}
 	tokenStruct := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-	//fmt.Println(util.JWTConfig.SecretKey)  //用于测试密钥是否正常
 	tokenString, _ := tokenStruct.SignedString(config.GlobalConfig.SecretKey)
 	return tokenString
 }

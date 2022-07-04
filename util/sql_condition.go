@@ -131,22 +131,34 @@ func (s *SqlCondition) Build(db *gorm.DB) *gorm.DB {
 	//if len(s.SelectedColumns) > 0 {
 	//	db = db.Select(s.SelectedColumns)
 	//}
+
 	//where
 	if len(s.ParamPairs) > 0 {
 		for _, parameterPair := range s.ParamPairs {
 			db = db.Where(parameterPair.ParamKey, parameterPair.ParamValue)
 		}
 	}
+
 	//order
-	var name []string
-	db.Raw("Select Name FROM SysColumns Where id=Object_Id('related_party')").Find(&name)
-	fmt.Print("666666666666666")
-	if s.OrderBy.OrderByColumn != "" {
+	//通过原始sql,把表中所有字段的名称查出来
+	var fieldNames []string
+	db.Raw("Select Name FROM SysColumns Where id=Object_Id('related_party')").Find(&fieldNames)
+	//判断排序字段是否为数据库的有效字段
+	orderByFieldValidOrNot := false
+	for _, fieldName := range fieldNames {
+		if s.OrderBy.OrderByColumn == fieldName {
+			orderByFieldValidOrNot = true
+			break
+		}
+	}
+	//如果排序字段有效
+	if orderByFieldValidOrNot == true {
 		if s.OrderBy.Desc == true {
 			db = db.Order(s.OrderBy.OrderByColumn + " desc")
 		}
 		db = db.Order(s.OrderBy.OrderByColumn)
 	}
+
 	//limit
 	//if s.Paging != nil && s.Paging.PageSize > 0 {
 	//	db = db.Limit(s.Paging.PageSize)

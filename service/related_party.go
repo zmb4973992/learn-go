@@ -124,6 +124,24 @@ func (RelatedPartyService) List(paramIn dto.RelatedPartyListDTO) serializer.Resp
 func (RelatedPartyService) Update(paramIn *model.RelatedParty) serializer.ResponseForDetail {
 	//var record model.RelatedParty
 	//对model进行清洗，生成dao层需要的model
+	if paramIn.ChineseName != nil && *paramIn.ChineseName == "" {
+		paramIn.ChineseName = nil
+	}
+	if paramIn.EnglishName != nil && *paramIn.EnglishName == "" {
+		paramIn.EnglishName = nil
+	}
+	if paramIn.Address != nil && *paramIn.Address == "" {
+		paramIn.Address = nil
+	}
+	if paramIn.Telephone != nil && *paramIn.Telephone == "" {
+		paramIn.Telephone = nil
+	}
+	if paramIn.UniformSocialCreditCode != nil && *paramIn.UniformSocialCreditCode == "" {
+		paramIn.UniformSocialCreditCode = nil
+	}
+	if paramIn.Code != nil && *paramIn.Code == -1 {
+		paramIn.Code = nil
+	}
 
 	//清洗完毕，开始update
 	r := dao.NewRelatedDAO()
@@ -145,8 +163,25 @@ func (RelatedPartyService) Update(paramIn *model.RelatedParty) serializer.Respon
 
 func (RelatedPartyService) Create(paramIn *model.RelatedParty) serializer.ResponseForDetail {
 	//对model进行清洗，生成dao层需要的model
+	if paramIn.ChineseName != nil && *paramIn.ChineseName == "" {
+		paramIn.ChineseName = nil
+	}
+	if paramIn.EnglishName != nil && *paramIn.EnglishName == "" {
+		paramIn.EnglishName = nil
+	}
+	if paramIn.Address != nil && *paramIn.Address == "" {
+		paramIn.Address = nil
+	}
+	if paramIn.Telephone != nil && *paramIn.Telephone == "" {
+		paramIn.Telephone = nil
+	}
+	if paramIn.UniformSocialCreditCode != nil && *paramIn.UniformSocialCreditCode == "" {
+		paramIn.UniformSocialCreditCode = nil
+	}
+	if paramIn.Code != nil && *paramIn.Code == -1 {
+		paramIn.Code = nil
+	}
 
-	//清洗完毕，开始create
 	r := dao.NewRelatedDAO()
 	err := r.Create(paramIn)
 	if err != nil {
