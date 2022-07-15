@@ -21,5 +21,6 @@ func Login(c *gin.Context) {
 		return
 	}
 	res := s.Login()
+
 	c.JSON(http.StatusOK, res)
 }

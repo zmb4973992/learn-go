@@ -36,6 +36,7 @@ func (s UserLoginService) Login() serializer.ResponseForDetail {
 	return serializer.ResponseForDetail{
 		Data: gin.H{
 			"access_token": token,
+			"roles":        []string{"公司级权限", "事业部级权限"},
 		},
 		Code:    status.Success,
 		Message: status.GetMessage(status.Success),
