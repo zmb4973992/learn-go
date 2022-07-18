@@ -7,6 +7,13 @@ type UserDTO struct {
 	Roles    []string `json:"roles"`
 }
 
+type UserGetDTO struct {
+	ID          int      `json:"id"`
+	Username    string   `json:"username"`
+	Roles       []string `json:"roles"`
+	Departments []string `json:"departments"` //待完善
+}
+
 type UserListDTO struct {
 	ID    int  `form:"id"`
 	IDGte *int `form:"id_gte"`

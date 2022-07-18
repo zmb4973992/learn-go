@@ -8,7 +8,7 @@ import (
 
 type UserDAO struct{}
 
-func (UserDAO) Get(id int) *dto.UserDTO {
+func (UserDAO) Get(id int) *dto.UserGetDTO {
 	var tempUser model.User
 	//先把基础的账号密码查出来
 	err := DB.Model(&model.User{}).Where("id = ?", id).First(&tempUser).Error
@@ -26,11 +26,10 @@ func (UserDAO) Get(id int) *dto.UserDTO {
 		roles = append(roles, role.Name)
 	}
 	//把所有查出的结果赋值给输出变量
-	var u = dto.UserDTO{}
+	var u = dto.UserGetDTO{}
 	u.ID = tempUser.ID
 	u.Username = tempUser.Username
 	u.Roles = roles
-	//这里不添加密码,是因为不需要
 
 	return &u
 }
