@@ -9,11 +9,29 @@ import (
 type UserDAO struct{}
 
 func (UserDAO) Get(id int) *dto.UserDTO {
-	var u dto.UserDTO
-	err := DB.Model(&model.User{}).Where("id = ?", id).First(&u).Error
+	var tempUser model.User
+	//先把基础的账号密码查出来
+	err := DB.Model(&model.User{}).Where("id = ?", id).First(&tempUser).Error
 	if err != nil {
 		return nil
 	}
+	//然后把该userID的所有role_and_user记录查出来
+	var roleAndUsers []model.RoleAndUser
+	DB.Model(&model.RoleAndUser{}).Where("user_id = ?", id).Find(&roleAndUsers)
+	//然后把所有的roleID提取出来，查出相应的角色名称
+	var roles []string
+	for _, record := range roleAndUsers {
+		var role model.Role
+		DB.Model(&model.Role{}).Where("id = ?", record.RoleID).Find(&role)
+		roles = append(roles, role.Name)
+	}
+	//把所有查出的结果赋值给输出变量
+	var u = dto.UserDTO{}
+	u.ID = tempUser.ID
+	u.Username = tempUser.Username
+	u.Roles = roles
+	//这里不添加密码,是因为不需要
+
 	return &u
 }
 

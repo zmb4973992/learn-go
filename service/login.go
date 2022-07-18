@@ -37,6 +37,7 @@ func (s UserLoginService) Login() serializer.ResponseForDetail {
 		Data: gin.H{
 			"access_token": token,
 			"roles":        []string{"公司级权限", "事业部级权限"},
+			"说明":           "这是写死在service/login.go的内容",
 		},
 		Code:    status.Success,
 		Message: status.GetMessage(status.Success),

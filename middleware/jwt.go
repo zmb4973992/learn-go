@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"learn-go/serializer"
 	"learn-go/util/jwt"
@@ -26,7 +25,7 @@ func JWT() gin.HandlerFunc {
 		//开始校验access_token
 
 		res, err := jwt.ParseToken(token)
-		fmt.Println(err)
+		//如果存在错误或token已过期
 		if err != nil || res.ExpiresAt < time.Now().Unix() {
 			c.JSON(http.StatusOK, serializer.ResponseForDetail{
 				Data:    nil,
@@ -38,6 +37,7 @@ func JWT() gin.HandlerFunc {
 		}
 		//如果access_token校验通过
 		c.Set("UserID", res.UserID)
+		//roles := "d"
 		c.Next()
 		return
 		//这里只是用作测试jwt能否正常返回值，生产环境下只设置authorization、修改context、不返回任何信息，否则会对后续环节造成干扰

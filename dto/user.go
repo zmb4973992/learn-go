@@ -1,9 +1,10 @@
 package dto
 
 type UserDTO struct {
-	ID       int    `json:"id"`
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	ID       int      `json:"id"`
+	Username string   `json:"username" binding:"required"`
+	Password string   `json:"password" binding:"required"`
+	Roles    []string `json:"roles"`
 }
 
 type UserListDTO struct {
