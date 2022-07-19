@@ -10,23 +10,15 @@ import (
 	"strconv"
 )
 
-type IUserController interface {
-	Create(c *gin.Context)
-	Get(c *gin.Context)
-	Update(c *gin.Context)
-	Delete(c *gin.Context)
-	List(c *gin.Context)
-}
-
-type userController struct {
+type UserController struct {
 	baseController
 }
 
-func NewUserController() IUserController {
-	return userController{}
+func NewUserController() UserController {
+	return UserController{}
 }
 
-func (u userController) Get(c *gin.Context) {
+func (u UserController) Get(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, serializer.ResponseForDetail{
@@ -54,7 +46,7 @@ func (u userController) Get(c *gin.Context) {
 	return
 }
 
-func (userController) Create(c *gin.Context) {
+func (UserController) Create(c *gin.Context) {
 	//先声明空的dto，再把context里的数据绑到dto上
 	var u dto.UserDTO
 	err := c.ShouldBindJSON(&u)
@@ -73,7 +65,7 @@ func (userController) Create(c *gin.Context) {
 }
 
 // Update controller的功能：解析uri参数、json参数，拦截非法参数，然后传给service层处理
-func (userController) Update(c *gin.Context) {
+func (UserController) Update(c *gin.Context) {
 	//这里只更新传过来的参数，所以采用map形式
 	paramIn := make(map[string]any)
 	_ = c.ShouldBindJSON(&paramIn)
@@ -94,7 +86,7 @@ func (userController) Update(c *gin.Context) {
 	c.JSON(200, res)
 }
 
-func (userController) Delete(c *gin.Context) {
+func (UserController) Delete(c *gin.Context) {
 	//把uri上的id参数传递给结构体形式的入参
 	id, err := strconv.Atoi(c.Param("id"))
 	//如果解析失败，例如URI的参数不是数字
@@ -111,7 +103,7 @@ func (userController) Delete(c *gin.Context) {
 	c.JSON(200, response)
 }
 
-func (userController) List(c *gin.Context) {
+func (UserController) List(c *gin.Context) {
 	var userListDTO dto.UserListDTO
 	err := c.ShouldBindQuery(&userListDTO)
 	if err != nil {
