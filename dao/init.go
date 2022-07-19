@@ -30,6 +30,7 @@ func Init() {
 	err = DB.AutoMigrate(
 		&model.RelatedParty{},
 		&model.Project{},
+		&model.OrganizationStructure{},
 		&model.User{},
 		&model.Role{},
 		&model.RoleAndUser{},
