@@ -22,6 +22,7 @@ const (
 	// ErrorFailToDeleteRecord 删除记录失败，请重试
 	ErrorFailToDeleteRecord int = 1011
 	ErrorFileTooLarge       int = 1012
+	ErrorFailToUploadFiles  int = 1013
 
 	ErrorInvalidUsernameOrPassword int = 2001
 	ErrorUsernameExist             int = 2002
@@ -48,6 +49,7 @@ var Message = map[int]string{
 	ErrorFailToSaveRecord:          "保存记录失败",
 	ErrorFailToDeleteRecord:        "删除记录失败",
 	ErrorFileTooLarge:              "文件过大",
+	ErrorFailToUploadFiles:         "上传文件失败",
 
 	ErrorInvalidUsernameOrPassword: "用户名或密码错误",
 	ErrorUsernameExist:             "用户名已存在",

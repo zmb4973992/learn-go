@@ -9,7 +9,8 @@ type User struct {
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
 	//这里是声名外键关系，并不是实际字段。不建议用gorm的多对多的设定，不好修改
-	Roles []RoleAndUser `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Roles                   []RoleAndUser `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	OrganizationStructureID int
 }
 
 // TableName 将表名改为user
