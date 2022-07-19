@@ -23,7 +23,7 @@ func UploadInit() {
 // UploadSingleFile
 //上传单个文件专用，经过uuid加持后返回唯一文件名和错误信息。
 //第二个入参为前端的关键词名称。
-func UploadSingleFile(c *gin.Context, key string) (uniqueFileName string, err error) {
+func UploadSingleFile(c *gin.Context, key string) (uniqueFilename string, err error) {
 	_, header, err := c.Request.FormFile(key)
 	if err != nil {
 		return "", err
@@ -42,7 +42,7 @@ func UploadSingleFile(c *gin.Context, key string) (uniqueFileName string, err er
 
 // UploadMultipleFiles 上传多个文件专用，经过uuid加持后返回唯一文件名和错误信息，文件名之间用竖线 | 分隔。
 // 第二个入参为前端的关键词名称。
-func UploadMultipleFiles(c *gin.Context, key string) (uniqueFileNames []string, err error) {
+func UploadMultipleFiles(c *gin.Context, key string) (uniqueFilenames []string, err error) {
 	form, err := c.MultipartForm()
 	if err != nil {
 		return nil, err
