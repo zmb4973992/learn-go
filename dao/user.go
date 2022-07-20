@@ -31,10 +31,12 @@ func (UserDAO) Get(id int) *dto.UserGetDTO {
 	u.ID = tempUser.ID
 	u.Username = tempUser.Username
 	u.Roles = roles
-	var temp model.User
-	model.DB.Debug().Preload("Department").Model(&model.User{}).Where("id = ?", 14).First(&temp)
-	for _, v := range temp.Department {
-		fmt.Println(*v.DepartmentID)
+	var temp model.RelatedParty
+	model.DB.Debug().Preload("Project.Test").Model(&model.RelatedParty{}).Where("id = ?", 19).First(&temp)
+	for _, v := range temp.Project {
+		for _, u := range v.Test {
+			fmt.Println(u.Name)
+		}
 	}
 	return &u
 }

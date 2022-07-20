@@ -18,6 +18,7 @@ type Project struct {
 	UpdatedAt        time.Time
 	//外键
 	RelatedPartyID int
+	Test           []Test
 }
 
 // TableName 将表名改为project

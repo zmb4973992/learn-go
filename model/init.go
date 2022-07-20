@@ -34,6 +34,7 @@ func Init() {
 		&DepartmentAndUser{},
 		&Role{},
 		&RoleAndUser{},
+		&Test{},
 	)
 
 	if err != nil {
