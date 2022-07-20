@@ -1,3 +1,9 @@
 package model
 
-type baseModel struct{}
+import "time"
+
+type BaseModel struct {
+	ID        int       `json:"id"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
+}
