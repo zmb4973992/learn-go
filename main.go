@@ -2,7 +2,7 @@ package main
 
 import (
 	"learn-go/config"
-	"learn-go/dao"
+	"learn-go/model"
 	"learn-go/router"
 	"learn-go/util"
 	"learn-go/util/casbin"
@@ -16,7 +16,7 @@ func main() {
 	//加载日志记录器，使用的是zap
 	logger.Init()
 	//连接数据库
-	dao.Init()
+	model.Init()
 	//初始化snowflake，用来生成唯一ID
 	snowflake.Init()
 	//初始化casbin，用于权限控制

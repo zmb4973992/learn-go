@@ -4,7 +4,6 @@ import "time"
 
 type Project struct {
 	ID               int64
-	RelatedPartyID   uint //外键
 	ProjectCode      string
 	ProjectFullName  string
 	ProjectShortName string
@@ -17,6 +16,8 @@ type Project struct {
 	ExchangeRate     float64
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
+	//外键
+	RelatedPartyID int
 }
 
 // TableName 将表名改为project

@@ -14,16 +14,10 @@ type RelatedParty struct {
 	Code                    *int    `json:"code" binding:"required"`
 	CreatedAt               *time.Time
 	UpdatedAt               *time.Time
+	Project                 []Project `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 // TableName 修改数据库的表名
 func (RelatedParty) TableName() string {
 	return "related_party"
 }
-
-//func (u *RelatedParty) BeforeUpdate(db *gorm.DB) (err error) {
-//	if u.ChineseName != nil && *u.ChineseName == "" {
-//		u.ChineseName = nil
-//	}
-//	return nil
-//}
