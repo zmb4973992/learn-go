@@ -31,7 +31,7 @@ func (UserDAO) Get(id int) *dto.UserGetDTO {
 	u.Username = tempUser.Username
 	u.Roles = roles
 	var temp model.RelatedParty
-	model.DB.Debug().Joins("Project").First(&temp)
+	model.DB.Debug().First(&temp)
 	//for _, v := range temp.Project {
 	//	for _, u := range v.Test {
 	//		fmt.Println(u.Name)

@@ -5,6 +5,7 @@ import (
 	"learn-go/dto"
 	"learn-go/serializer"
 	"learn-go/service"
+	"learn-go/util"
 	"learn-go/util/status"
 	"net/http"
 	"strconv"
@@ -38,6 +39,7 @@ func (u UserController) Get(c *gin.Context) {
 		})
 		return
 	}
+	util.UpdateUserInfo(c, id)
 	c.JSON(http.StatusOK, serializer.ResponseForDetail{
 		Data:    res,
 		Code:    status.Success,

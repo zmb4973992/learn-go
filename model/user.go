@@ -15,8 +15,8 @@ type User struct {
 	JobNumber         *string
 	//这里是声名外键关系，并不是实际字段。不建议用gorm的多对多的设定，不好修改
 	//角色
-	Role       []RoleAndUser       `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Department []DepartmentAndUser `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Roles       []RoleAndUser       `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Departments []DepartmentAndUser `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 // TableName 将表名改为user

@@ -3,16 +3,17 @@ package util
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"learn-go/model"
 )
 
-func UpdateUserInfo(c *gin.Context, userID int) error {
-	var roles []string
-	c.Set("roles", []string{"vip1", "vip2"})
-
-	temp, _ := c.Get("roles")
-	roles = temp.([]string)
-	for _, role := range roles {
-		fmt.Println(role)
+func UpdateUserInfo(c *gin.Context, userID int) {
+	var user model.User
+	model.DB.Preload("Roles").First(&user)
+	var roleNames []string
+	for _, role := range user.Roles {
+		var tempRole model.Role
+		model.DB.Where("id = ?", role.RoleID).First(&tempRole)
+		roleNames = append(roleNames, tempRole.Name)
 	}
-	//报错：无法在多个赋值中将 any 赋给 roles (类型 []string)
+	fmt.Println(roleNames)
 }
