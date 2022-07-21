@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"fmt"
 	"learn-go/dto"
 	"learn-go/model"
 	"learn-go/util"
@@ -32,12 +31,12 @@ func (UserDAO) Get(id int) *dto.UserGetDTO {
 	u.Username = tempUser.Username
 	u.Roles = roles
 	var temp model.RelatedParty
-	model.DB.Debug().Preload("Project.Test").Model(&model.RelatedParty{}).Where("id = ?", 19).First(&temp)
-	for _, v := range temp.Project {
-		for _, u := range v.Test {
-			fmt.Println(u.Name)
-		}
-	}
+	model.DB.Debug().Joins("Project").First(&temp)
+	//for _, v := range temp.Project {
+	//	for _, u := range v.Test {
+	//		fmt.Println(u.Name)
+	//	}
+	//}
 	return &u
 }
 
