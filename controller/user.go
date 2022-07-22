@@ -5,7 +5,6 @@ import (
 	"learn-go/dto"
 	"learn-go/serializer"
 	"learn-go/service"
-	"learn-go/util"
 	"learn-go/util/status"
 	"net/http"
 	"strconv"
@@ -19,7 +18,7 @@ func NewUserController() UserController {
 	return UserController{}
 }
 
-func (u UserController) Get(c *gin.Context) {
+func (UserController) Get(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, serializer.ResponseForDetail{
@@ -31,20 +30,7 @@ func (u UserController) Get(c *gin.Context) {
 	}
 	s := service.NewUserService()
 	res := s.Get(id)
-	if res == nil {
-		c.JSON(http.StatusOK, serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.ErrorRecordNotFound,
-			Message: status.GetMessage(status.ErrorRecordNotFound),
-		})
-		return
-	}
-	util.UpdateUserInfo(c, id)
-	c.JSON(http.StatusOK, serializer.ResponseForDetail{
-		Data:    res,
-		Code:    status.Success,
-		Message: status.GetMessage(status.Success),
-	})
+	c.JSON(http.StatusOK, res)
 	return
 }
 

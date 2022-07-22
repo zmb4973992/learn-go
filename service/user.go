@@ -21,10 +21,21 @@ func NewUserService() UserService {
 	return UserService{}
 }
 
-func (s UserService) Get(id int) (data any) {
+func (s UserService) Get(userID int) *serializer.ResponseForDetail {
 	u := new(dao.UserDAO)
-	data = u.Get(id)
-	return data
+	result := u.Get(userID)
+	if result == nil {
+		return &serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorRecordNotFound,
+			Message: status.GetMessage(status.ErrorRecordNotFound),
+		}
+	}
+	return &serializer.ResponseForDetail{
+		Data:    result,
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
+	}
 }
 
 func (UserService) Create(paramIn *dto.UserDTO) serializer.ResponseForDetail {
