@@ -8,10 +8,14 @@ type UserDTO struct {
 }
 
 type UserGetDTO struct {
-	ID          int      `json:"id"`
-	Username    string   `json:"username"`
-	Roles       []string `json:"roles"`
-	Departments []string `json:"departments"` //待完善
+	Username          string   `json:"username"`            //用户名
+	FullName          string   `json:"full_name"`           //全名
+	EmailAddress      string   `json:"email_address"`       //邮箱地址
+	IsValid           *bool    `json:"is_valid"`            //是否有效
+	MobilePhoneNumber string   `json:"mobile_phone_number"` //手机号
+	EmployeeNumber    string   `json:"employee_number"`     //工号
+	Roles             []string `json:"roles"`               //角色
+	Departments       []string `json:"departments"`         //部门
 }
 
 type UserListDTO struct {

@@ -1,7 +1,5 @@
 package dto
 
-import "github.com/go-playground/validator/v10"
-
 //RelatedPartyDTO dto只接收、发送数据，并不会对数据库进行任何操作
 //所有操作数据库的工作会经过dao层的清洗后都交给model来完成
 //这里必须是指针类型，因为只有指针才能向前端传递nil
@@ -29,10 +27,4 @@ type RelatedPartyListDTO struct {
 
 	Paging  PagingDTO
 	OrderBy OrderByDTO
-}
-
-func notEmpty(field validator.FieldLevel) {
-	if field.Field().String() == "" {
-
-	}
 }

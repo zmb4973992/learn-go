@@ -12,7 +12,7 @@ dao层的基本原则：
 出参为err或dto，用于反馈结果或给其他层使用
 */
 
-func NewRelatedDAO() RelatedPartyDAO {
+func NewRelatedPartyDAO() RelatedPartyDAO {
 	return RelatedPartyDAO{}
 }
 
@@ -35,7 +35,7 @@ func (RelatedPartyDAO) Get(id int) *dto.RelatedPartyDTO {
 // Create 这里是只负责新增，不写任何业务逻辑。
 // 创建数据库记录，返回错误
 func (RelatedPartyDAO) Create(paramIn *model.RelatedParty) error {
-	err := model.DB.Debug().Create(paramIn).Error
+	err := model.DB.Create(paramIn).Error
 	return err
 }
 

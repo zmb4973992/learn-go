@@ -20,6 +20,7 @@ func Init() *gin.Engine {
 	userController := controller.NewUserController()
 	relatedPartyController := controller.NewRelatedPartyController()
 	noRouteController := controller.NewNoRouteController()
+	departmentController := controller.NewDepartmentController()
 
 	engine.POST("/api/user", userController.Create)            //添加用户
 	engine.POST("/upload_single", controller.UploadSingle)     //测试上传单个
@@ -32,11 +33,14 @@ func Init() *gin.Engine {
 		api.DELETE("/user/:id", userController.Delete) //删除用户
 		api.GET("/user/list", userController.List)     //获取用户列表
 
-		api.GET("/related_party/list", relatedPartyController.List)  //获取列表
-		api.GET("/related_party/:id", relatedPartyController.Get)    //获取详情
-		api.PUT("/related_party/:id", relatedPartyController.Update) //修改详情
-		api.POST("/related_party", relatedPartyController.Create)    //添加详情
-		api.DELETE("/:id", relatedPartyController.Delete)            //删除详情
+		api.GET("/related_party/list", relatedPartyController.List)  //获取相关方列表
+		api.GET("/related_party/:id", relatedPartyController.Get)    //获取相关方详情
+		api.PUT("/related_party/:id", relatedPartyController.Update) //修改相关方
+		api.POST("/related_party", relatedPartyController.Create)    //新增相关方
+		api.DELETE("/:id", relatedPartyController.Delete)            //删除相关方
+
+		api.GET("/department/:id", departmentController.Get) //获取部门详情
+		api.POST("/department", departmentController.Create) //新增部门
 	}
 
 	engine.NoRoute(noRouteController.NoRoute)
