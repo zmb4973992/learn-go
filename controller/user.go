@@ -36,7 +36,7 @@ func (UserController) Get(c *gin.Context) {
 
 func (UserController) Create(c *gin.Context) {
 	//先声明空的dto，再把context里的数据绑到dto上
-	var u dto.UserDTO
+	var u dto.UserCreateDTO
 	err := c.ShouldBindJSON(&u)
 	if err != nil {
 		c.JSON(http.StatusOK, serializer.ResponseForDetail{

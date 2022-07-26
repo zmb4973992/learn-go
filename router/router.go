@@ -39,9 +39,10 @@ func Init() *gin.Engine {
 		api.POST("/related_party", relatedPartyController.Create)    //新增相关方
 		api.DELETE("/:id", relatedPartyController.Delete)            //删除相关方
 
-		api.GET("/department/:id", departmentController.Get)    //获取部门详情
-		api.POST("/department", departmentController.Create)    //新增部门
-		api.PUT("/department/:id", departmentController.Update) //修改部门
+		api.GET("/department/:id", departmentController.Get)       //获取部门详情
+		api.POST("/department", departmentController.Create)       //新增部门
+		api.PUT("/department/:id", departmentController.Update)    //修改部门
+		api.DELETE("/department/:id", departmentController.Delete) //删除部门
 	}
 
 	engine.NoRoute(noRouteController.NoRoute)

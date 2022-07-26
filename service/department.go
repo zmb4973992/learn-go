@@ -36,11 +36,19 @@ func (s DepartmentService) Get(departmentID int) *serializer.ResponseForDetail {
 	}
 }
 
-func (DepartmentService) Create(paramIn *model.Department) serializer.ResponseForDetail {
-	//对model进行清洗，生成dao层需要的model
-
+func (DepartmentService) Create(paramIn *dto.DepartmentCreateAndUpdateDTO) serializer.ResponseForDetail {
+	//对dto进行清洗，生成dao层需要的model
+	var paramOut model.Department
+	paramOut.Name = paramIn.Name
+	paramOut.Level = paramIn.Level
+	//model.Department的SuperiorID为指针，需要处理
+	if *paramIn.SuperiorID == 0 {
+		paramOut.SuperiorID = nil
+	} else {
+		paramOut.SuperiorID = paramIn.SuperiorID
+	}
 	d := dao.NewDepartmentDAO()
-	err := d.Create(paramIn)
+	err := d.Create(&paramOut)
 	if err != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
@@ -57,7 +65,7 @@ func (DepartmentService) Create(paramIn *model.Department) serializer.ResponseFo
 
 // Update 更新为什么要用dto？首先因为很多数据需要绑定，也就是一定要传参；
 // 其次是需要清洗
-func (DepartmentService) Update(paramIn *dto.DepartmentUpdateDTO) serializer.ResponseForDetail {
+func (DepartmentService) Update(paramIn *dto.DepartmentCreateAndUpdateDTO) serializer.ResponseForDetail {
 	var paramOut model.Department
 	paramOut.ID = paramIn.ID
 	paramOut.Name = paramIn.Name
@@ -78,6 +86,23 @@ func (DepartmentService) Update(paramIn *dto.DepartmentUpdateDTO) serializer.Res
 			Data:    nil,
 			Code:    status.ErrorFailToSaveRecord,
 			Message: status.GetMessage(status.ErrorFailToSaveRecord),
+		}
+	}
+	return serializer.ResponseForDetail{
+		Data:    nil,
+		Code:    status.Success,
+		Message: status.GetMessage(status.Success),
+	}
+}
+
+func (DepartmentService) Delete(departmentID int) serializer.ResponseForDetail {
+	r := dao.NewDepartmentDAO()
+	err := r.Delete(departmentID)
+	if err != nil {
+		return serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorFailToDeleteRecord,
+			Message: status.GetMessage(status.ErrorFailToDeleteRecord),
 		}
 	}
 	return serializer.ResponseForDetail{

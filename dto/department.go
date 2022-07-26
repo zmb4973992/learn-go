@@ -6,8 +6,8 @@ type DepartmentGetDTO struct {
 	Superior any    `json:"superior"` //上级机构
 }
 
-// DepartmentUpdateDTO 只有update用，create直接用model
-type DepartmentUpdateDTO struct {
+// DepartmentCreateAndUpdateDTO 只有update用，create直接用model
+type DepartmentCreateAndUpdateDTO struct {
 	ID         int    `json:"id"`
 	Name       string `json:"name" binding:"required"`        //部门名称
 	Level      string `json:"level" binding:"required"`       //级别，如公司、事业部、部门等

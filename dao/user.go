@@ -60,11 +60,8 @@ func (UserDAO) Get(userID int) *dto.UserGetDTO {
 }
 
 // Create 这里是只负责新增，不写任何业务逻辑。只要收到参数就创建数据库记录，然后返回错误
-func (UserDAO) Create(paramIn *dto.UserDTO) error {
-	user := new(model.User)
-	user.Username = paramIn.Username
-	user.Password = paramIn.Password
-	err := model.DB.Create(user).Error
+func (UserDAO) Create(param *model.User) error {
+	err := model.DB.Create(param).Error
 	return err
 }
 
@@ -83,7 +80,7 @@ func (UserDAO) Delete(id int) error {
 
 // List 入参为sql查询条件，结果为数据列表+分页情况
 func (UserDAO) List(sqlCondition util.SqlCondition) (
-	list []dto.UserDTO, totalPages int, totalRecords int) {
+	list []dto.UserCreateDTO, totalPages int, totalRecords int) {
 	db := model.DB
 	//select
 	if len(sqlCondition.SelectedColumns) > 0 {

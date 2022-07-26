@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"learn-go/dao"
 	"learn-go/dto"
+	"learn-go/model"
 	"learn-go/serializer"
 	"learn-go/util"
 	"learn-go/util/status"
@@ -38,22 +39,84 @@ func (s UserService) Get(userID int) *serializer.ResponseForDetail {
 	}
 }
 
-func (UserService) Create(paramIn *dto.UserDTO) serializer.ResponseForDetail {
+func (UserService) Create(paramIn *dto.UserCreateDTO) serializer.ResponseForDetail {
+	//把基础数据添加到user表
+	var paramOutForUser model.User
+	paramOutForUser.Username = paramIn.Username
+	//对密码进行加密
 	encryptedPassword, err := util.EncryptPassword(paramIn.Password)
 	if err != nil {
 		return serializer.NewErrorResponse(status.ErrorFailToEncrypt)
 	}
-	paramIn.Password = encryptedPassword
+	paramOutForUser.Password = encryptedPassword
+	paramOutForUser.IsValid = paramIn.IsValid
+	if *paramIn.FullName == "" {
+		paramOutForUser.FullName = nil
+	} else {
+		paramOutForUser.FullName = paramIn.FullName
+	}
+	if *paramIn.EmailAddress == "" {
+		paramOutForUser.EmailAddress = nil
+	} else {
+		paramOutForUser.EmailAddress = paramIn.EmailAddress
+	}
+	if *paramIn.MobilePhoneNumber == "" {
+		paramOutForUser.MobilePhoneNumber = nil
+	} else {
+		paramOutForUser.MobilePhoneNumber = paramIn.MobilePhoneNumber
+	}
+	if *paramIn.EmployeeNumber == "" {
+		paramOutForUser.EmployeeNumber = nil
+	} else {
+		paramOutForUser.EmployeeNumber = paramIn.EmployeeNumber
+	}
 
 	var userDAO dao.UserDAO
-	err = userDAO.Create(paramIn)
+	err = userDAO.Create(&paramOutForUser)
 	if err != nil {
 		return serializer.ResponseForDetail{
 			Data:    nil,
-			Code:    status.Error,
-			Message: status.GetMessage(status.Error),
+			Code:    status.ErrorFailToSaveRecord,
+			Message: status.GetMessage(status.ErrorFailToSaveRecord),
 		}
 	}
+
+	//把用户-角色的对应关系添加到role_and_user表
+	//如果有角色数据：
+	if len(paramIn.Roles) > 0 {
+		var paramOutForRoleAndUser []model.RoleAndUser
+		for _, roleID := range paramIn.Roles {
+			var record model.RoleAndUser
+			record.UserID = &paramOutForUser.ID
+			record.RoleID = &roleID
+			paramOutForRoleAndUser = append(paramOutForRoleAndUser, record)
+		}
+		var roleAndUserDao dao.RoleAndUserDAO
+		err = roleAndUserDao.CreateBatch(paramOutForRoleAndUser)
+	}
+
+	//把用户-部门的对应关系添加到department_and_user表
+	//如果有部门数据：
+	if len(paramIn.Departments) > 0 {
+		var paramOutForDepartmentAndUser []model.DepartmentAndUser
+		for _, departmentID := range paramIn.Departments {
+			var record model.DepartmentAndUser
+			record.UserID = &paramOutForUser.ID
+			record.DepartmentID = &departmentID
+			paramOutForDepartmentAndUser = append(paramOutForDepartmentAndUser, record)
+		}
+		var departmentAndUserDao dao.DepartmentAndUserDAO
+		err = departmentAndUserDao.CreateBatch(paramOutForDepartmentAndUser)
+	}
+
+	if err != nil {
+		return serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorFailToSaveRecord,
+			Message: status.GetMessage(status.ErrorFailToSaveRecord),
+		}
+	}
+
 	return serializer.ResponseForDetail{
 		Data:    nil,
 		Code:    status.Success,

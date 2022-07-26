@@ -1,10 +1,15 @@
 package dto
 
-type UserDTO struct {
-	ID       int      `json:"id"`
-	Username string   `json:"username" binding:"required"`
-	Password string   `json:"password" binding:"required"`
-	Roles    []string `json:"roles"`
+type UserCreateDTO struct {
+	Username          string  `json:"username" binding:"required"`
+	Password          string  `json:"password" binding:"required"`
+	FullName          *string `json:"full_name"  binding:"required"`           //全名
+	EmailAddress      *string `json:"email_address" binding:"required"`        //邮箱地址
+	IsValid           *bool   `json:"is_valid" binding:"required"`             //是否有效
+	MobilePhoneNumber *string `json:"mobile_phone_number"  binding:"required"` //手机号
+	EmployeeNumber    *string `json:"employee_number" binding:"required"`      //工号
+	Roles             []int   `json:"roles" binding:"required"`                //角色
+	Departments       []int   `json:"departments" binding:"required"`          //部门
 }
 
 type UserGetDTO struct {
