@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"learn-go/dto"
 	"learn-go/model"
 	"learn-go/serializer"
 	"learn-go/service"
@@ -50,4 +51,31 @@ func (DepartmentController) Create(c *gin.Context) {
 	res := s.Create(&paramIn)
 	c.JSON(http.StatusOK, res)
 	return
+}
+
+func (DepartmentController) Update(c *gin.Context) {
+	var param dto.DepartmentUpdateDTO
+	//先把json参数绑定到model
+	err := c.ShouldBindJSON(&param)
+	if err != nil {
+		c.JSON(http.StatusOK, serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorInvalidJsonParameters,
+			Message: status.GetMessage(status.ErrorInvalidJsonParameters),
+		})
+		return
+	}
+	//把uri上的id参数传递给结构体形式的入参
+	param.ID, err = strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusOK, serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorInvalidURIParameters,
+			Message: status.GetMessage(status.ErrorInvalidURIParameters),
+		})
+		return
+	}
+	s := service.NewDepartmentService()
+	res := s.Update(&param)
+	c.JSON(200, res)
 }
