@@ -52,8 +52,9 @@ func Auth() gin.HandlerFunc {
 		e := util.NewEnforcer()
 		if len(subjects) > 0 {
 			for _, subject := range subjects {
-				res, _ := e.Enforce(subject, object, act)
-				if res {
+				fmt.Println(subject, object, act)
+				ok, _ := e.Enforce(subject, object, act)
+				if ok {
 					fmt.Println("通过")
 					c.Next()
 					break
