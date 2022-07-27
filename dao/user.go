@@ -100,7 +100,7 @@ func (UserDAO) List(sqlCondition util.SqlCondition) (
 	}
 	//count 计算totalRecords
 	var tempTotalRecords int64
-	err := db.Debug().Model(&model.User{}).Count(&tempTotalRecords).Error
+	err := db.Model(&model.User{}).Count(&tempTotalRecords).Error
 	if err != nil {
 		return nil, 0, 0
 	}
@@ -114,7 +114,7 @@ func (UserDAO) List(sqlCondition util.SqlCondition) (
 
 	//count 计算totalPages
 	totalPages = model.GetTotalPages(totalRecords, sqlCondition.Paging.PageSize)
-	err = db.Model(&model.User{}).Debug().Find(&list).Error
+	err = db.Model(&model.User{}).Find(&list).Error
 	if err != nil {
 		return nil, 0, 0
 	}

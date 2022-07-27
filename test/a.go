@@ -1,26 +1,33 @@
 package main
 
-import (
-	"golang.org/x/crypto/bcrypt"
-	"log"
-)
+import "fmt"
+
+type studentNormal struct {
+	name string
+	age  int
+}
+
+type studentPointer struct {
+	name *string
+	age  *int
+}
+
+var oldStudents = []*studentNormal{
+	{name: "tom", age: 20},
+	{name: "sam", age: 22},
+	{name: "bill", age: 25}}
+
+var newStudents []studentPointer
 
 func main() {
-	var a *string
-	var b *string
-	str := "hello"
-	b = &str
-	a, err := Encrypt(b)
-	if err != nil {
-		return
+	for _, v := range oldStudents {
+		if v.age > 20 {
+			fmt.Println(&v.name)
+			var x studentPointer
+			x.name = &v.name
+			x.age = &v.age
+			newStudents = append(newStudents, x)
+		}
 	}
-	log.Print(*a)
-}
-func Encrypt(originalString *string) (encryptedString *string, err error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(*originalString), 10) //10为加密难度，取值范围为4-31，官方建议10
-	if err != nil {
-		return nil, err
-	}
-	*encryptedString = string(bytes)
-	return encryptedString, nil
+	fmt.Println(*newStudents[0].name, *newStudents[1].name)
 }

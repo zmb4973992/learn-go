@@ -71,43 +71,48 @@ func (UserService) Create(paramIn *dto.UserCreateDTO) serializer.ResponseForDeta
 		paramOutForUser.EmployeeNumber = paramIn.EmployeeNumber
 	}
 
-	var userDAO dao.UserDAO
-	err = userDAO.Create(&paramOutForUser)
-	if err != nil {
-		return serializer.ResponseForDetail{
-			Data:    nil,
-			Code:    status.ErrorFailToSaveRecord,
-			Message: status.GetMessage(status.ErrorFailToSaveRecord),
+	//由于涉及到多表的保存，所以这里启用事务
+	err = model.DB.Transaction(func(tx *gorm.DB) error {
+		//注意，这里没有使用dao层的封装方法，而是使用tx+gorm的原始方法
+		err = tx.Create(&paramOutForUser).Error
+		if err != nil {
+			return err
 		}
-	}
+		//把用户-角色的对应关系添加到role_and_user表
+		//如果有角色数据：
+		if len(paramIn.Roles) > 0 {
+			var paramOutForRoleAndUser []model.RoleAndUser
 
-	//把用户-角色的对应关系添加到role_and_user表
-	//如果有角色数据：
-	if len(paramIn.Roles) > 0 {
-		var paramOutForRoleAndUser []model.RoleAndUser
-		for _, roleID := range paramIn.Roles {
-			var record model.RoleAndUser
-			record.UserID = &paramOutForUser.ID
-			record.RoleID = &roleID
-			paramOutForRoleAndUser = append(paramOutForRoleAndUser, record)
+			//这里不能使用v进行循环赋值，因为涉及到指针，会导致所有记录都变成一样的
+			for k := range paramIn.Roles {
+				var record model.RoleAndUser
+				record.UserID = &paramOutForUser.ID
+				record.RoleID = &paramIn.Roles[k]
+				paramOutForRoleAndUser = append(paramOutForRoleAndUser, record)
+			}
+			err = tx.Create(paramOutForRoleAndUser).Error
+			if err != nil {
+				return err
+			}
 		}
-		var roleAndUserDao dao.RoleAndUserDAO
-		err = roleAndUserDao.CreateBatch(paramOutForRoleAndUser)
-	}
 
-	//把用户-部门的对应关系添加到department_and_user表
-	//如果有部门数据：
-	if len(paramIn.Departments) > 0 {
-		var paramOutForDepartmentAndUser []model.DepartmentAndUser
-		for _, departmentID := range paramIn.Departments {
-			var record model.DepartmentAndUser
-			record.UserID = &paramOutForUser.ID
-			record.DepartmentID = &departmentID
-			paramOutForDepartmentAndUser = append(paramOutForDepartmentAndUser, record)
+		//把用户-部门的对应关系添加到department_and_user表
+		//如果有部门数据：
+		if len(paramIn.Departments) > 0 {
+			var paramOutForDepartmentAndUser []model.DepartmentAndUser
+			for k := range paramIn.Departments {
+				var record model.DepartmentAndUser
+				record.UserID = &paramOutForUser.ID
+				record.DepartmentID = &paramIn.Departments[k]
+				paramOutForDepartmentAndUser = append(paramOutForDepartmentAndUser, record)
+			}
+			err = tx.Create(paramOutForDepartmentAndUser).Error
+			if err != nil {
+				return err
+			}
 		}
-		var departmentAndUserDao dao.DepartmentAndUserDAO
-		err = departmentAndUserDao.CreateBatch(paramOutForDepartmentAndUser)
-	}
+		return nil
+	})
 
 	if err != nil {
 		return serializer.ResponseForDetail{

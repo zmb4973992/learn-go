@@ -1,9 +1,11 @@
 package dao
 
 import (
+	"fmt"
 	"learn-go/dto"
 	"learn-go/model"
 	"learn-go/util"
+	"strconv"
 )
 
 func NewDepartmentDAO() DepartmentDAO {
@@ -12,10 +14,13 @@ func NewDepartmentDAO() DepartmentDAO {
 
 type DepartmentDAO struct{}
 
-//防止多层递归的专用变量
-var recursionTimes int = 0
-
 func (DepartmentDAO) Get(departmentID int) *dto.DepartmentGetDTO {
+	//默认嵌套递归次数上限为4次，太多了降低效率，而且没必要
+	return getWithRecursionLimit(departmentID, 4, 0)
+}
+
+//由于get方法有递归调用，所以需要在这里多加2个参数进行限制。标准的get方法调用这个内部函数，达到封装的效果
+func getWithRecursionLimit(departmentID int, recursionTimesLimit int, recursionTimes int) *dto.DepartmentGetDTO {
 	var departmentGetDTO = dto.DepartmentGetDTO{}
 	//把基础的部门信息查出来
 	var department model.Department
@@ -26,17 +31,17 @@ func (DepartmentDAO) Get(departmentID int) *dto.DepartmentGetDTO {
 	//把所有查出的结果赋值给输出变量
 	departmentGetDTO.Name = department.Name
 	departmentGetDTO.Level = department.Level
-	//查询上级部门信息，采用递归方法
-	if department.SuperiorID != nil && recursionTimes <= 4 {
+	fmt.Println(recursionTimes)
+
+	//递归查询上级部门信息
+	if department.SuperiorID != nil {
 		recursionTimes += 1
-		var tempDepartmentDAO DepartmentDAO
-		departmentGetDTO.Superior = tempDepartmentDAO.Get(*department.SuperiorID)
+		if recursionTimes <= recursionTimesLimit {
+			departmentGetDTO.Superior = getWithRecursionLimit(*department.SuperiorID, recursionTimesLimit, recursionTimes)
+		} else {
+			departmentGetDTO.Superior = "递归深度超过" + strconv.Itoa(recursionTimesLimit) + "次，请检查数据是否正确"
+		}
 	}
-	if recursionTimes > 4 {
-		departmentGetDTO.Superior = "递归超过4次，请检查数据是否准确"
-	}
-	//重置递归次数
-	recursionTimes = 0
 	return &departmentGetDTO
 }
 
