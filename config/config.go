@@ -12,6 +12,7 @@ type config struct {
 	jwtConfig
 	logConfig
 	uploadConfig
+	roleConfig
 }
 
 type appConfig struct {
@@ -45,6 +46,11 @@ type logConfig struct {
 type uploadConfig struct {
 	FullPath         string
 	MaxSizeForUpload int64
+}
+
+type roleConfig struct {
+	level string
+	name  string
 }
 
 var (
@@ -94,4 +100,5 @@ func loadConfig() {
 
 	GlobalConfig.uploadConfig.FullPath = v.GetString("upload_files.FullPath") + "/"
 	GlobalConfig.uploadConfig.MaxSizeForUpload = v.GetInt64("upload_files.MaxSize") << 20
+
 }

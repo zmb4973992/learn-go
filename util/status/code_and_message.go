@@ -30,6 +30,8 @@ const (
 
 	ErrorAccessTokenInvalid  int = 3001
 	ErrorAccessTokenNotFound int = 3002
+	ErrorPermissionDenied    int = 3100
+	ErrorNeedAdminPrivilege  int = 3101
 
 	ErrorFailToEncrypt  int = 4001
 	ErrorInvalidRequest int = 4002
@@ -57,6 +59,8 @@ var Message = map[int]string{
 
 	ErrorAccessTokenInvalid:  "access_token无效",
 	ErrorAccessTokenNotFound: "缺少access_token",
+	ErrorPermissionDenied:    "权限不足",
+	ErrorNeedAdminPrivilege:  "权限不足，该操作需要管理员权限",
 
 	ErrorFailToEncrypt:  "加密失败",
 	ErrorInvalidRequest: "请求路径错误",

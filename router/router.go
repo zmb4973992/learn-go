@@ -28,10 +28,10 @@ func Init() *gin.Engine {
 	//依次加载所有的路由组，以下都需要经过jwt验证
 	api := engine.Group("/api").Use(middleware.JWT())
 	{
-		api.GET("/user/:id", userController.Get)       //获取用户详情
-		api.PUT("/user/:id", userController.Update)    //修改用户
-		api.DELETE("/user/:id", userController.Delete) //删除用户
-		api.GET("/user/list", userController.List)     //获取用户列表
+		api.GET("/user/:id", middleware.Auth(), userController.Get) //获取用户详情
+		api.PUT("/user/:id", userController.Update)                 //修改用户
+		api.DELETE("/user/:id", userController.Delete)              //删除用户
+		api.GET("/user/list", userController.List)                  //获取用户列表
 
 		api.GET("/related_party/list", relatedPartyController.List)  //获取相关方列表
 		api.GET("/related_party/:id", relatedPartyController.Get)    //获取相关方详情

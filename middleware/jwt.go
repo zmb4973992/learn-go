@@ -3,6 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"learn-go/serializer"
+	"learn-go/util"
 	"learn-go/util/jwt"
 	"learn-go/util/status"
 	"net/http"
@@ -36,8 +37,7 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 		//如果access_token校验通过
-		c.Set("UserID", res.UserID)
-		//roles := "d"
+		util.SetUserInfo(c, res.UserID)
 
 		c.Next()
 		return
