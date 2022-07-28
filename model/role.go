@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type Role struct {
 	ID        int
@@ -14,4 +16,21 @@ type Role struct {
 // TableName 修改表名
 func (Role) TableName() string {
 	return "role"
+}
+
+func generateRoles() error {
+	roles := []Role{
+		{Name: "管理员"},
+		{Name: "公司级"},
+		{Name: "事业部级"},
+		{Name: "部门级"},
+		{Name: "项目级"},
+	}
+	for _, role := range roles {
+		err := DB.FirstOrCreate(&Role{}, role).Error
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

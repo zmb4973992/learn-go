@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"fmt"
 	"learn-go/dto"
 	"learn-go/model"
 	"learn-go/util"
@@ -31,7 +30,6 @@ func getWithRecursionLimit(departmentID int, recursionTimesLimit int, recursionT
 	//把所有查出的结果赋值给输出变量
 	departmentGetDTO.Name = department.Name
 	departmentGetDTO.Level = department.Level
-	fmt.Println(recursionTimes)
 
 	//递归查询上级部门信息
 	if department.SuperiorID != nil {
@@ -39,7 +37,7 @@ func getWithRecursionLimit(departmentID int, recursionTimesLimit int, recursionT
 		if recursionTimes <= recursionTimesLimit {
 			departmentGetDTO.Superior = getWithRecursionLimit(*department.SuperiorID, recursionTimesLimit, recursionTimes)
 		} else {
-			departmentGetDTO.Superior = "递归深度超过" + strconv.Itoa(recursionTimesLimit) + "次，请检查数据是否正确"
+			departmentGetDTO.Superior = "递归深度超过" + strconv.Itoa(recursionTimesLimit) + "次，可能存在循环递归，请检查数据是否正确"
 		}
 	}
 	return &departmentGetDTO

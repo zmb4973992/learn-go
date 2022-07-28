@@ -25,6 +25,10 @@ func (User) TableName() string {
 	return "user"
 }
 
+func generateUsers() error {
+	return nil
+}
+
 //func UserExistOrNot(username string) (code uint64) {
 //	var user model.User
 //	util.DB.Where("username = ?", username).First(&user)

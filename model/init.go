@@ -36,10 +36,22 @@ func Init() {
 		&RoleAndUser{},
 		&Test{},
 	)
-
 	if err != nil {
 		panic(err)
 	}
+
+	//生成初始数据
+	generateData()
+}
+
+func generateData() {
+	if err = generateRoles(); err != nil {
+		panic(err)
+	}
+	if err = generateDepartments(); err != nil {
+		panic(err)
+	}
+
 }
 
 func GetTotalPages(totalRecords int, pageSize int) (totalPages int) {

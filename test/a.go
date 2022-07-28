@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"gopkg.in/gomail.v2"
+)
 
 type studentNormal struct {
 	name string
@@ -12,22 +14,21 @@ type studentPointer struct {
 	age  *int
 }
 
-var oldStudents = []*studentNormal{
-	{name: "tom", age: 20},
-	{name: "sam", age: 22},
-	{name: "bill", age: 25}}
-
-var newStudents []studentPointer
-
 func main() {
-	for _, v := range oldStudents {
-		if v.age > 20 {
-			fmt.Println(&v.name)
-			var x studentPointer
-			x.name = &v.name
-			x.age = &v.age
-			newStudents = append(newStudents, x)
-		}
+	m := gomail.NewMessage()
+	m.SetHeader("From", "19725912@qq.com")
+	m.SetHeader("To", "19725912@qq.com")
+	m.SetHeader("Subject", "Hello!")
+	m.SetBody("text/plain", "dfsdf3f3f3fwef")
+
+	d := gomail.NewDialer("smtp.qq.com",
+		465, "19725912@qq.com", "ejusnukrlniabgdd")
+
+	// Send the email to Bob, Cora and Dan.
+	if err := d.DialAndSend(m); err != nil {
+		panic(err)
 	}
-	fmt.Println(*newStudents[0].name, *newStudents[1].name)
 }
+
+//88:UpfPUMJGrbBWx9VR
+//qq:ejusnukrlniabgdd
