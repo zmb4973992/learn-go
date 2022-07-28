@@ -1,32 +1,26 @@
 package main
 
-import (
-	"gopkg.in/gomail.v2"
-)
-
-type studentNormal struct {
-	name string
-	age  int
-}
-
-type studentPointer struct {
-	name *string
-	age  *int
-}
+import "gopkg.in/gomail.v2"
 
 func main() {
+	e := "19725912@qq.com"
+	sub := "123"
+	body := "dfkjk"
+
+	test(e, sub, body)
+}
+
+func test(e string, sub string, body string) {
 	m := gomail.NewMessage()
-	m.SetHeader("From", "19725912@qq.com")
-	m.SetHeader("To", "19725912@qq.com")
-	m.SetHeader("Subject", "Hello!")
-	m.SetBody("text/plain", "dfsdf3f3f3fwef")
+	m.SetHeader("From", e)
+	m.SetHeader("To", e)
+	m.SetHeader("Subject", sub)
+	m.SetBody("text/plain", body)
 
-	d := gomail.NewDialer("smtp.qq.com",
-		465, "19725912@qq.com", "ejusnukrlniabgdd")
+	d := gomail.NewDialer("smtp.qq.com", 465, "19725912@qq.com", "ejusnukrlniabgdd")
+	err := d.DialAndSend(m)
+	if err != nil {
 
-	// Send the email to Bob, Cora and Dan.
-	if err := d.DialAndSend(m); err != nil {
-		panic(err)
 	}
 }
 

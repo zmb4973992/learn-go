@@ -10,6 +10,8 @@ import (
 )
 
 func main() {
+	//测试发邮件
+	util.SendEmail("19725912@qq.com", "标题", "我是内容")
 	//加载配置
 	config.Init()
 	//加载日志记录器，使用的是zap
@@ -28,4 +30,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 }
