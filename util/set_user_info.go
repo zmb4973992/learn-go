@@ -9,7 +9,7 @@ import (
 func SetUserInfo(c *gin.Context, userID int) {
 	var user model.User
 	//预加载全部关联信息
-	model.DB.Preload(clause.Associations).First(&user)
+	model.DB.Where("id = ?", userID).Preload(clause.Associations).First(&user)
 	//设置拥有的权限
 	var roleNames []string
 	for _, role := range user.Roles {

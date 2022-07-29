@@ -10,10 +10,6 @@ import (
 type NoRouteController struct {
 }
 
-func NewNoRouteController() NoRouteController {
-	return NoRouteController{}
-}
-
 func (NoRouteController) NoRoute(c *gin.Context) {
 	c.JSON(http.StatusBadRequest, serializer.ResponseForDetail{
 		Data:    nil,

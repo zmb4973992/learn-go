@@ -10,8 +10,6 @@ import (
 )
 
 func main() {
-	//测试发邮件
-	util.SendEmail("19725912@qq.com", "标题", "我是内容")
 	//加载配置
 	config.Init()
 	//加载日志记录器，使用的是zap
@@ -26,9 +24,9 @@ func main() {
 	util.UploadInit()
 	//开始采用自定义的方式生成引擎
 	engine := router.Init()
+
 	err := engine.Run(":" + config.GlobalConfig.HttpPort)
 	if err != nil {
 		panic(err)
 	}
-
 }

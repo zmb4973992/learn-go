@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Project struct {
-	ID               int64
+	BaseModel
 	ProjectCode      *string
 	ProjectFullName  *string
 	ProjectShortName *string
@@ -16,9 +16,9 @@ type Project struct {
 	ExchangeRate     *float64
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
-	//外键
-	RelatedPartyID int
-	Test           []Test
+	RelatedPartyID   *int
+	//外键，拆解情况
+	Breakdowns []ProjectBreakdown `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 // TableName 将表名改为project

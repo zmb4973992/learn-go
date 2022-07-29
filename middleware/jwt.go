@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func JWT() gin.HandlerFunc {
+func NeedLogin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("access_token")
 		//如果请求头没有携带access_token

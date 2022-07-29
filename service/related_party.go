@@ -144,7 +144,7 @@ func (RelatedPartyService) Update(paramIn *model.RelatedParty) serializer.Respon
 	}
 
 	//清洗完毕，开始update
-	r := dao.NewRelatedPartyDAO()
+	r := new(dao.RelatedPartyDAO)
 	err := r.Update(paramIn)
 	//拿到dao层的返回结果，进行处理
 	if err != nil {
@@ -182,7 +182,7 @@ func (RelatedPartyService) Create(paramIn *model.RelatedParty) serializer.Respon
 		paramIn.Code = nil
 	}
 
-	r := dao.NewRelatedPartyDAO()
+	r := new(dao.RelatedPartyDAO)
 	err := r.Create(paramIn)
 	if err != nil {
 		return serializer.ResponseForDetail{
@@ -199,7 +199,7 @@ func (RelatedPartyService) Create(paramIn *model.RelatedParty) serializer.Respon
 }
 
 func (RelatedPartyService) Delete(id int) serializer.ResponseForDetail {
-	r := dao.NewRelatedPartyDAO()
+	r := new(dao.RelatedPartyDAO)
 	err := r.Delete(id)
 	if err != nil {
 		return serializer.ResponseForDetail{

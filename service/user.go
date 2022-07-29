@@ -18,11 +18,7 @@ type UserService struct {
 	baseService
 }
 
-func NewUserService() UserService {
-	return UserService{}
-}
-
-func (s UserService) Get(userID int) *serializer.ResponseForDetail {
+func (UserService) Get(userID int) *serializer.ResponseForDetail {
 	u := new(dao.UserDAO)
 	result := u.Get(userID)
 	if result == nil {

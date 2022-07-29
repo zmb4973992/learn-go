@@ -12,10 +12,6 @@ dao层的基本原则：
 出参为err或dto，用于反馈结果或给其他层使用
 */
 
-func NewRelatedPartyDAO() RelatedPartyDAO {
-	return RelatedPartyDAO{}
-}
-
 // RelatedPartyDAO dao层的结构体没有数据，只是操作数据库进行增删改查，不写业务逻辑
 type RelatedPartyDAO struct{}
 

@@ -15,11 +15,7 @@ type DepartmentService struct {
 	baseService
 }
 
-func NewDepartmentService() DepartmentService {
-	return DepartmentService{}
-}
-
-func (s DepartmentService) Get(departmentID int) *serializer.ResponseForDetail {
+func (DepartmentService) Get(departmentID int) *serializer.ResponseForDetail {
 	u := new(dao.DepartmentDAO)
 	result := u.Get(departmentID)
 	if result == nil {
@@ -47,7 +43,7 @@ func (DepartmentService) Create(paramIn *dto.DepartmentCreateAndUpdateDTO) seria
 	} else {
 		paramOut.SuperiorID = paramIn.SuperiorID
 	}
-	d := dao.NewDepartmentDAO()
+	d := new(dao.DepartmentDAO)
 	err := d.Create(&paramOut)
 	if err != nil {
 		return serializer.ResponseForDetail{
@@ -78,7 +74,7 @@ func (DepartmentService) Update(paramIn *dto.DepartmentCreateAndUpdateDTO) seria
 	}
 
 	//清洗完毕，开始update
-	r := dao.NewDepartmentDAO()
+	r := new(dao.DepartmentDAO)
 	err := r.Update(&paramOut)
 	//拿到dao层的返回结果，进行处理
 	if err != nil {
@@ -96,7 +92,7 @@ func (DepartmentService) Update(paramIn *dto.DepartmentCreateAndUpdateDTO) seria
 }
 
 func (DepartmentService) Delete(departmentID int) serializer.ResponseForDetail {
-	r := dao.NewDepartmentDAO()
+	r := new(dao.DepartmentDAO)
 	err := r.Delete(departmentID)
 	if err != nil {
 		return serializer.ResponseForDetail{

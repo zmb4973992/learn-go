@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"learn-go/serializer"
 	"learn-go/util"
@@ -9,60 +8,41 @@ import (
 	"net/http"
 )
 
-func OnlyForAdmin() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		roles, ok := c.Get("roles")
-		if !ok {
-			c.JSON(http.StatusForbidden, serializer.ResponseForDetail{
-				Data:    nil,
-				Code:    status.ErrorNeedAdminPrivilege,
-				Message: status.GetMessage(status.ErrorNeedAdminPrivilege),
-			})
-			c.Abort()
-			return
-		}
-		for _, role := range roles.([]string) {
-			if role == "管理员权限" {
-				c.Next()
-				return
-			}
-			c.JSON(http.StatusForbidden, serializer.ResponseForDetail{
-				Data:    nil,
-				Code:    status.ErrorNeedAdminPrivilege,
-				Message: status.GetMessage(status.ErrorNeedAdminPrivilege),
-			})
-			c.Abort()
-			return
-		}
-	}
-}
-
-func Auth() gin.HandlerFunc {
+// NeedAuth 如果需要根据角色进行鉴权（casbin进行操作），则使用该中间件
+func NeedAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tempSubjects, ok := c.Get("roles") //获取用户角色,casbin规则的主体参数
 		subjects := tempSubjects.([]string)
-		if !ok {
+		if !ok || len(subjects) == 0 {
+			c.JSON(http.StatusOK, serializer.ResponseForDetail{
+				Data:    nil,
+				Code:    status.ErrorPermissionDenied,
+				Message: status.GetMessage(status.ErrorPermissionDenied),
+			})
 			c.Abort()
 			return
 		}
 
 		object := c.Request.URL.Path //获取请求路径，casbin规则的客体参数
 		act := c.Request.Method      //获取请求方法，casbin规则的动作参数
-		fmt.Println(subjects, object, act)
 		e := util.NewEnforcer()
-		if len(subjects) > 0 {
-			for _, subject := range subjects {
-				//fmt.Println(subject, object, act)
-				ok, _ := e.Enforce(subject, object, act)
-				if ok {
-					fmt.Println("通过")
-					c.Next()
-					break
-				}
-				fmt.Println("不通过")
-				c.Abort()
+		//对角色列表进行遍历
+		for _, subject := range subjects {
+			//如果角色符合casbin的规则
+			ok, _ := e.Enforce(subject, object, act)
+			if ok {
+				//放行，跳出循环
+				c.Next()
 				return
 			}
 		}
+		//循环结束，没有满足条件的角色，则中断请求
+		c.Abort()
+		c.JSON(http.StatusOK, serializer.ResponseForDetail{
+			Data:    nil,
+			Code:    status.ErrorPermissionDenied,
+			Message: status.GetMessage(status.ErrorPermissionDenied),
+		})
+		return
 	}
 }

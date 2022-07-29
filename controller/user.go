@@ -14,10 +14,6 @@ type UserController struct {
 	baseController
 }
 
-func NewUserController() UserController {
-	return UserController{}
-}
-
 func (UserController) Get(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -28,7 +24,7 @@ func (UserController) Get(c *gin.Context) {
 		})
 		return
 	}
-	s := service.NewUserService()
+	s := new(service.UserService)
 	res := s.Get(id)
 	c.JSON(http.StatusOK, res)
 	return
@@ -46,7 +42,7 @@ func (UserController) Create(c *gin.Context) {
 		})
 		return
 	}
-	s := service.NewUserService()
+	s := new(service.UserService)
 	res := s.Create(&u)
 	c.JSON(http.StatusOK, res)
 	return

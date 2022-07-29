@@ -14,10 +14,6 @@ type DepartmentController struct {
 	baseController
 }
 
-func NewDepartmentController() DepartmentController {
-	return DepartmentController{}
-}
-
 func (DepartmentController) Get(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -28,7 +24,7 @@ func (DepartmentController) Get(c *gin.Context) {
 		})
 		return
 	}
-	s := service.NewDepartmentService()
+	s := new(service.DepartmentService)
 	res := s.Get(id)
 	c.JSON(http.StatusOK, res)
 	return
@@ -46,7 +42,7 @@ func (DepartmentController) Create(c *gin.Context) {
 		})
 		return
 	}
-	s := service.NewDepartmentService()
+	s := new(service.DepartmentService)
 	res := s.Create(&param)
 	c.JSON(http.StatusOK, res)
 	return
@@ -74,7 +70,7 @@ func (DepartmentController) Update(c *gin.Context) {
 		})
 		return
 	}
-	s := service.NewDepartmentService()
+	s := new(service.DepartmentService)
 	res := s.Update(&param)
 	c.JSON(200, res)
 }
@@ -89,7 +85,7 @@ func (DepartmentController) Delete(c *gin.Context) {
 		})
 		return
 	}
-	s := service.NewDepartmentService()
+	s := new(service.DepartmentService)
 	response := s.Delete(id)
 	c.JSON(http.StatusOK, response)
 }

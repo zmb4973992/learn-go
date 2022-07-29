@@ -12,6 +12,7 @@ type Department struct {
 	//数据库规则限制，自引用不能设置级联更新和级联删除
 	//暂时不添加自引用的外键了，因为删除、更新都是麻烦事
 	//SuperiorID1 []Department        `gorm:"foreignkey:SuperiorID"`
+	//多对多的中间表需要外键，因为需要级联更新、级联删除
 	Users []DepartmentAndUser `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 

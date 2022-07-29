@@ -7,19 +7,15 @@ import (
 	"strconv"
 )
 
-func NewDepartmentDAO() DepartmentDAO {
-	return DepartmentDAO{}
-}
-
 type DepartmentDAO struct{}
 
 func (DepartmentDAO) Get(departmentID int) *dto.DepartmentGetDTO {
 	//默认嵌套递归次数上限为4次，太多了降低效率，而且没必要
-	return getWithRecursionLimit(departmentID, 4, 0)
+	return getDepartmentWithRecursionLimit(departmentID, 4, 0)
 }
 
 //由于get方法有递归调用，所以需要在这里多加2个参数进行限制。标准的get方法调用这个内部函数，达到封装的效果
-func getWithRecursionLimit(departmentID int, recursionTimesLimit int, recursionTimes int) *dto.DepartmentGetDTO {
+func getDepartmentWithRecursionLimit(departmentID int, recursionTimesLimit int, recursionTimes int) *dto.DepartmentGetDTO {
 	var departmentGetDTO = dto.DepartmentGetDTO{}
 	//把基础的部门信息查出来
 	var department model.Department
@@ -35,7 +31,7 @@ func getWithRecursionLimit(departmentID int, recursionTimesLimit int, recursionT
 	if department.SuperiorID != nil {
 		recursionTimes += 1
 		if recursionTimes <= recursionTimesLimit {
-			departmentGetDTO.Superior = getWithRecursionLimit(*department.SuperiorID, recursionTimesLimit, recursionTimes)
+			departmentGetDTO.Superior = getDepartmentWithRecursionLimit(*department.SuperiorID, recursionTimesLimit, recursionTimes)
 		} else {
 			departmentGetDTO.Superior = "递归深度超过" + strconv.Itoa(recursionTimesLimit) + "次，可能存在循环递归，请检查数据是否正确"
 		}

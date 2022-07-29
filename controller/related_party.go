@@ -31,10 +31,6 @@ type RelatedPartyController struct {
 	baseController
 }
 
-func NewRelatedPartyController() RelatedPartyController {
-	return RelatedPartyController{}
-}
-
 func (RelatedPartyController) Get(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
